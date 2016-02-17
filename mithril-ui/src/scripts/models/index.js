@@ -45,7 +45,7 @@ var Param = function(data) {
             break;
         case 'file':
             _pre_val = this.multiple()? _.first(this.value()) || '': this.value();
-            this.rdir = m.prop(_pre_val.substr(0, _pre_val.lastIndexOf('/')) || '/nihs');
+            this.rdir = m.prop(_pre_val.substr(0, _pre_val.lastIndexOf('/')) || '~');
             break;
         case 'dir':
             _pre_val = this.multiple()? _.first(this.value()) || '': this.value();
@@ -60,7 +60,7 @@ var Param = function(data) {
 var User = function(data) {
     data = data || {};
 
-    this.groupname = m.prop(data.groupname || localStorage.getItem('pypers.user.groupname') || 'nihs');
+    this.groupname = m.prop(data.groupname || localStorage.getItem('pypers.user.groupname') || 'youldapgroup');
     this.username  = m.prop(data.username  || localStorage.getItem('pypers.user.username')  || '');
     this.password  = m.prop(data.password  || '');
 

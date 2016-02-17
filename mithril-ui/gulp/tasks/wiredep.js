@@ -9,7 +9,6 @@ var wiredep = require('wiredep').stream;
 gulp.task('wiredep', function () {
     gulp.src('src/index.html')
         .pipe(wiredep({
-            exclude: ['nihs-birdcage'],
             directory: 'src/bower_components',
             fileTypes: {
                 html: {

@@ -17,7 +17,7 @@ module.exports = {
     }
   },
   groups: {
-    yourldapgourp: 'nihs'
+    yourldapgourp: 'yourldapgourp'
   },
   ldap: {
     server: {

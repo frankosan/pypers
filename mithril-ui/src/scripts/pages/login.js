@@ -14,9 +14,7 @@ var LoginPage = {
         var ctrl = this;
 
         ctrl.groups = [
-            { name: 'nihs', label: 'NIHS' },
-            { name: 'nrc', label: 'NRC' },
-            { name: 'sls', label: 'Purina' }
+            { name: 'LdapGroup', label: 'YoutLDAPGroup' }
         ];
 
         ctrl.user = m.prop(new models.User());
