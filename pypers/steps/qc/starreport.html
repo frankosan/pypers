@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+  <title>FastQC Report</title>
+  <style type="text/css">
+    body {
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #333;
+      background-color: #fff;
+    }
+    td, th {
+      padding: 8px;
+      line-height: 1.4;
+      vertical-align: middle;
+      border: 1px solid #ddd;
+      display: table-cell;
+    }
+    .index {
+      white-space: nowrap;
+      background-color: rgb(56, 179, 223);
+      color: #f5f5f5;
+    }
+    .sample {
+        font-weight:bold;
+        .new td {
+            border-top:2pt
+        }
+    }
+    th {
+      background-color: rgb(56, 179, 223);
+      color: #f5f5f5;
+    }
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+    }
+    tr:hover {
+      background-color: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <table>
+    <tr>
+      <th>No.</th>
+    {% for item in keys -%}
+      <th>{{ item }}</th>
+    {%- endfor %}
+    </tr>
+    {% set sample = {'id':''} %}
+    {% for name, record in table.iteritems() -%}
+      <tr>
+          <td class="index">{{ loop.index }}</td>
+      {% for key in keys -%}
+        {% if key == 'Name' -%}
+          <td class="name">{{ record[key] }}</td>
+        {%- elif key == 'Sample' %}
+            {% if record[key] == sample.id -%} 
+          <td class="sample"></td>
+            {% else %}
+                {% if sample.update({'id': record[key]}) %}{% endif %}
+          <td class="sample">{{ record[key] }}</td>
+            {%- endif %}
+        {%- else %}
+          <td class="{{ key|lower }}">{{ record[key] }}</td>
+        {%- endif %}
+      {%- endfor %}
+      </tr>
+    {%- endfor %}
+  </table>
+
+</body>
+</html>

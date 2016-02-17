@@ -1,0 +1,3 @@
+@mixin effect($effect) {
+  animation-name: $effect;
+}

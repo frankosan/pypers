@@ -1,0 +1,117 @@
+// -------------------------------------
+//   Panes TODO put in _panes.scss
+// -------------------------------------
+
+.pane,
+%pane {
+  position: fixed;
+  padding: 2rem;
+  z-index: $z-pane;
+  background: $pane-bg;
+  transition: all $trans-duration $trans-timing-function;
+  overflow: auto;
+}
+
+
+.pane-squish {
+  @extend %pane;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: $pane-squish__width - 200;
+  transform: translateX(100%);
+  border-left: 1px solid darken($pane-bg, 15%);
+  @include MQ(XLplus) {
+    width: $pane-squish__width;
+  }
+  padding: 2rem .7rem;
+}
+
+
+  .show-pane-squish {
+    .main {
+      right: $pane-squish__width - 200;
+      @include MQ(XLplus) {
+        right: $pane-squish__width;
+      }
+    }
+    .pane-squish { transform: translateX(1); }
+  }
+
+
+.pane-over {
+  @extend %pane;
+  top: 0;
+  bottom: 0;
+  left: -1 * $sidebar-width;
+  right: 0;
+  z-index: $z-pane-over;
+  background-color: $white;
+  transform: scale(1);
+  opacity: 1;
+  transition: all $trans-duration $trans-timing-function;
+
+  &.ng-hide {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+
+  &.ng-hide-add,
+  &.ng-hide-remove {
+    display: block !important;
+  }
+
+}
+
+.pane-over__left {
+  @extend %pane;
+  top: 0;
+  bottom: 0;
+  left: $sidebar-width;
+  transform: translateX(0);
+  box-shadow: inset 40px 0 40px -40px rgba(darken($pane-bg, 40%), .25);
+
+  &.ng-hide {
+    transform: translateX(-$pane-push__width);
+  }
+
+  &.ng-hide-add,
+  &.ng-hide-remove {
+    display: block !important;
+  }
+
+}
+
+.pane--header {
+  @include clearfix;
+  margin: 0 0 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid darken($gray-lighter, 15%);
+}
+
+.pane--title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+.pane--subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: $gray;
+}
+
+.pane--action {
+  font-size: 1.25rem;
+  color: $text-color;
+  margin: 0 .25rem;
+  vertical-align: middle;
+  padding-left: 0;
+  padding-right: 0;
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+
+.container__popout {
+  background: $pane-bg;
+}

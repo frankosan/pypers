@@ -1,0 +1,76 @@
+  .meter {
+    background: darken($gray-dark, 4%);
+    // border-radius: 25px;
+    box-shadow: inset 0 -1px 1px rgba($white,0.3);
+  }
+  .meter > span {
+    transition: width .8s linear;
+    display: block;
+    height: .7rem;
+    // border-radius: 25px;
+    background-color: rgb(43,194,83);
+    background-image: -webkit-gradient(
+      linear,
+      left bottom,
+      left top,
+      color-stop(0, rgb(43,194,83)),
+      color-stop(1, rgb(84,240,84))
+      );
+    position: absolute;
+    top: 0; left: 0;
+    overflow: hidden;
+  }
+  .meter > span:after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background-image:
+        -webkit-gradient(linear, 0 0, 100% 100%,
+          color-stop(.25, rgba(255, 255, 255, .3)),
+          color-stop(.25, transparent), color-stop(.5, transparent),
+          color-stop(.5, rgba(255, 255, 255, .3)),
+          color-stop(.75, rgba(255, 255, 255, .3)),
+          color-stop(.75, transparent), to(transparent)
+        );
+    z-index: 1;
+    -webkit-background-size: 50px 50px;
+    -webkit-animation: move 3s linear infinite;
+                border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+                border-top-left-radius: 20px;
+              border-bottom-left-radius: 20px;
+    overflow: hidden;
+  }
+
+  @-webkit-keyframes move {
+      0% {
+          background-position: 0 0;
+      }
+      100% {
+          background-position: 50px 50px;
+      }
+  }
+
+  .orange > span {
+    background-color: #f1a165;
+    background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f1a165),color-stop(1, #f36d0a));
+    background-image: -webkit-linear-gradient(#f1a165, #f36d0a);
+  }
+
+  .blue > span {
+    background-color: $blue;
+    background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, $blue),color-stop(1, $blue-dark));
+    background-image: -webkit-linear-gradient($blue, $blue-dark);
+  }
+
+  .red > span {
+    background-color: #f0a3a3;
+    background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f0a3a3),color-stop(1, #f42323));
+    background-image: -webkit-linear-gradient(#f0a3a3, #f42323);
+  }
+
+  .nostripes > span > span, .nostripes > span:after {
+    -webkit-animation: none;
+    background-image: none;
+  }
+

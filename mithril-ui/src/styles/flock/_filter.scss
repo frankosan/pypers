@@ -1,0 +1,66 @@
+// -------------------------------------
+//   Filters
+// -------------------------------------
+
+.filters {
+  background: darken($body-bg, 4%);
+  padding: 1rem;
+  border-radius: 3px;
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+
+  .dropdown-menu {
+    left: .5rem;
+    border-radius: 0 3px 3px 3px;
+    margin-top: -1px;
+    border: 1px solid $gray-light;
+    box-shadow: 2px 2px 2px -1px rgba($black, .2);
+    user-select: none;
+  }
+
+  label {
+    font-size: .875rem;
+  }
+
+  > li {
+    flex: 0 1 auto;
+    padding: 0 .5rem;
+  }
+}
+
+.list-label {
+  color: $gray;
+  text-shadow: 1px 1px 0 $white;
+  font-weight: bold;
+  font-size: .875rem;
+}
+
+.filter.btn-group.open .dropdown-toggle {
+  background: $white;
+  border: 1px solid $gray-light;
+  border-bottom: 1px solid rgba(0,0,0,0);
+  box-shadow: 2px 0 2px -1px rgba($black, .2);
+}
+
+.filter.btn-group .dropdown-toggle {
+  background: transparent;
+  border-radius: 3px 3px 0 0;
+  border: 1px solid rgba(0,0,0, 0);
+  color: $text-color;
+  text-shadow: 1px 1px 0 $white;
+  display: block;
+  font-size: .875rem;
+  padding: .5rem 1rem;
+  font-weight: bold;
+  position: relative;
+  z-index: $zindex-dropdown + 1;
+  user-select: none;
+
+  &.filter__none {
+    color: $gray;
+  }
+  > i {
+    color: rgba($text-color, .5);
+  }
+}

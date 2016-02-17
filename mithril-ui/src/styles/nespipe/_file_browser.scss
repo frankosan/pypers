@@ -1,0 +1,277 @@
+$fb-width: 500px;
+
+.file-browser-modal{
+  // This is modal bg
+  &:before{
+    content: "";
+    display: none;
+    background: rgba($black, .3);
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10;
+  }
+}
+
+.browsing .file-browser-modal {
+    // Active animate in modal
+    &:before{
+      display: block;
+    }
+    .file-browser {
+        transform: translate(0, 0);
+        top: 5%;
+    }
+}
+
+.file-browser {
+    transform: translate(0, -500%);
+    transition: transform 0.3s ease-out;
+
+    margin-left: -300px;
+    position: fixed;
+    left: 50%;
+    top: -100%;
+    z-index: 11;
+    width: $fb-width !important;
+    &.multiple-true {
+        width: $fb-width * 2 !important;
+        left: 37.5%;
+    }
+    height: 90%;
+
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba($black, .5);
+
+    .content {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+        .left {
+            flex: 1 0 50%;
+        }
+        .right {
+            flex: 0 0 50%;
+            margin-top: 2.5rem;
+            padding: 1rem;
+            background-color: $white;
+            box-shadow: inset 1px 0px 1px 0px rgba($black, 0.2);
+            position: relative;
+
+            ul {
+                list-style-position: inside;
+                list-style-type: decimal;
+                position: absolute;
+                top: .5rem; bottom: 3.5rem;
+                right: .5rem; left: 0;
+                overflow: auto;
+            }
+            li {
+                white-space: nowrap;
+                line-height: 1.75rem;
+                padding-left: 2rem;
+                border-bottom: 1px solid lighten($gray-light, 5%);
+                cursor: default;
+                position: relative;
+                margin-left: .5rem;
+                color: $gray;
+
+                span:hover {
+                    color: $gray-dark;
+                    cursor: pointer;
+                }
+
+                .fa {
+                    cursor: pointer;
+                    position: absolute;
+                    left: 0rem;
+                    font-size: 1rem;
+                    text-align: center;
+                    color: $gray;
+                    padding: .4rem;
+                    top: 0;
+
+                    &:hover { color: $red; }
+                }
+            }
+        }
+    }
+
+    .menu-bar {
+        height: 2.5rem;
+        position: absolute;
+        background-color: white;
+        left: 0;
+        top:  2.5rem;
+        width: $fb-width;
+        border-bottom: .5rem solid lighten($gray-light, 5%);
+        border-left: .2rem solid lighten($gray-light, 5%);
+        border-right: .2rem solid lighten($gray-light, 5%);
+        z-index: 9;
+        text-align: right;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        &.pop {
+            box-shadow: 0 2px 2px -1px rgba($black, 0.1);
+        }
+
+        .search-bar {
+            @include search-bar;
+            @include search-bar-open;
+            background-color: transparent;
+            background-image: none;
+            width: $fb-width;
+
+            & + .icon, & + .icon + .icon {
+                font-size: 1rem;
+                color: $blue;
+                cursor: pointer;
+                margin-right: 1rem;
+                &:hover { color: $blue-dark; }
+            }
+        }
+    }
+
+    &.error {
+        height: auto;
+        top: 50% !important;
+        margin-top: -5rem;
+        height: 10rem;
+        .message {
+            color: $red;
+            margin-top: 2rem;
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    .path-crumbs {
+        border-radius: 5px 5px 0 0;
+        background-color: lighten($gray-light, 5%);
+        padding: 0 .5rem;
+        position: absolute;
+        right: 0;
+        width: 100%;
+        white-space: nowrap;
+        height: 2.5rem;
+        line-height: 2.5rem;
+
+        overflow-x: overlay;
+
+        .crumb {
+            margin: 0 .2rem;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .browser-list {
+        position: absolute;
+        top: 5rem;
+        bottom: 3.5rem;
+        width: $fb-width;
+        overflow-y: auto;
+
+        &.multiple-true {
+            // top: 5rem;
+            li { padding-left: 3rem; }
+        }
+
+        ul.mode-dir {
+            li.ls-file {
+                color: $gray;
+            }
+            li.ls-dir:hover {
+                background-color: rgba($blue, .2);
+            }
+        }
+        ul.mode-file {
+            li.ls-file:hover {
+                background-color: rgba($blue, .2);
+            }
+        }
+
+        .ls-file .loadfofn {
+            float: right;
+        }
+
+        li {
+            cursor: default;
+            border-bottom: 1px solid lighten($gray-light, 5%);
+            padding: .4rem 0 .4rem 2rem;
+            white-space: nowrap;
+            &:nth-child(even) {
+                background-color: lighten($gray-light, 14%);
+            }
+            &.ls-dir {
+                a:hover {
+                    text-decoration: underline;
+                }
+            }
+            &.ls-all {
+                em {
+                    font-style: normal;
+                    color: $blue;
+                    line-height: 1.2rem;
+                    &:hover {
+                        text-decoration: underline;
+                        cursor: pointer;
+                    }
+                }
+                &.disabled em {
+                    text-shadow: 1px 1px 0 white;
+                    color: $gray-light;
+                    &:hover {
+                        text-decoration: none;
+                        cursor: not-allowed;
+                    }
+                }
+            }
+            &.selected {
+                background-color: $blue !important;
+                color: $white;
+                a { color: $white; }
+                a.chb { color: $white; }
+                a:hover { color: $white; }
+            }
+            .fa { margin-right: .4rem; }
+            a.chb {
+                font-size: 1rem;
+                color: $gray;
+                position: absolute;
+                left: 1rem;
+
+            }
+
+            -webkit-user-select: none;
+        }
+    }
+
+    .action-buttons {
+        border-radius: 0 0 5px 5px;
+        background-color: lighten($gray-light, 5%);
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+
+        text-align: right;
+
+        padding: .5rem;
+
+        button {
+            margin-right: .5rem;
+        }
+    }
+}
+
+.selection-list {
+    ul {
+        li {
+        }
+    }
+}

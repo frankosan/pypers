@@ -1,0 +1,145 @@
+.run-form-container {
+    display: flex;
+    flex-direction: row-reverse;
+
+    height: 100%;
+
+    .run-form {
+        position: relative;
+        font-family: $font-family-monospace;
+        flex: 1 0 34%;
+
+        border-radius: 5px;
+
+        height: 100%;
+        padding: 2rem 0 3rem;
+
+        form {
+            height: 100%;
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 1px 1px 0px 0px lighten($gray-light, 5%);
+        }
+
+        .filter {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            text-align: right;
+
+            background-color: white;
+            color: $gray-light;
+            text-shadow: 1px 0 0 $white;
+
+            padding: 0 1rem .5rem;
+            border-radius: 5px 5px 0 0;
+
+            box-shadow: 1px 0 0px 0px lighten($gray-light, 5%);
+
+            z-index: 9;
+
+            .fa {
+                font-size: 1rem;
+                background-color: $body-bg;
+                padding: .2rem .4rem;
+                border-radius: 0  0 5px 5px;
+            }
+
+            &.active {
+                color: $blue;
+            }
+        }
+
+        .form-message {
+            height: 0;
+            overflow: hidden;
+
+            box-shadow: 1px 1px 0px 0px lighten($gray-light, 5%);
+
+            .error-list, .message {
+                padding: 1rem;
+            }
+            .error-list {
+                width: 100%;
+                tr:hover td {
+                    cursor: pointer;
+                    text-decoration: underline;
+                }
+                td {
+                    border-bottom: 1px inset $white;
+                    padding: .2rem;
+                    vertical-align: top;
+                }
+                .txt {
+                    width: 90%;
+                    padding-left: .5rem;
+                }
+                .sname {
+                    white-space: nowrap;
+                }
+                .pname {
+                    white-space: nowrap;
+                    padding-left: .5rem;
+                    text-align: right;
+                }
+            }
+            &.hidden  {
+                height: 0;
+
+                & + .param-list {
+                    height: 100%;
+                }
+            }
+            &.error, &.success   {
+                overflow-y: auto;
+            }
+            &.error  {
+                max-height: 30%;
+                min-height: 20%;
+                color:$red;
+
+                & + .param-list {
+                    min-height: 70%;
+                    max-height: 80%;
+                }
+            }
+            &.success {
+                max-height: 20%;
+                min-height: 10%;
+                background-color: lighten($green, 40%);
+                color:$green;
+
+                & + .param-list {
+                    min-height: 80%;
+                    max-height: 90%;
+                }
+            }
+        }
+
+        .submit-bar {
+            position: absolute;
+            right: -1px;
+            left: -1px;
+            bottom: -.5rem;
+            background-color: $body-bg;
+            text-align: right;
+            padding: .5rem 0;
+            padding-right: 1px;
+        }
+    }
+
+    .run-dag {
+        flex: 0 0 66%;
+        height: 100%;
+        overflow: auto;
+        margin-left: 1rem;
+        box-shadow: 1px 1px 0px 0px lighten($gray-light, 5%);
+        border-radius: 5px;
+
+        #cy {
+            top: 0;
+            background-color: lighten($blue-light, 6%);
+        }
+    }
+}

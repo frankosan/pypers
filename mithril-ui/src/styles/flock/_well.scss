@@ -1,0 +1,48 @@
+// Wells
+.well,
+%well {
+  background-color: rgba($gray-light, .4);
+  border: 1px solid rgba($gray-light, .8);
+  width: 100%;
+  display: block;
+  transition: 250ms ease-in-out all;
+  border-radius: 3px;
+  padding: 1rem;
+  margin: 0 0 1rem;
+  &:last-child {margin-bottom: 0;}
+}
+
+.well__light {
+  background-color: rgba($white, .9);
+}
+
+.well__sm {
+  @extend %well;
+  padding: .5rem;
+  margin: 0 0 .5rem;
+}
+
+.well__centered {
+  @extend %well;
+  text-align: center;
+}
+
+.well--label {
+  margin: 0 0 .25rem;
+}
+
+.well--title {
+  margin: 0 0 1rem;
+
+}
+
+.well--aside {
+  background: lighten($blue-light, 6%);
+  padding: 2rem;
+  border-left: 3px solid $blue-light;
+}
+
+.well__warning {
+  background: lighten($orange, 40%);
+  border-color: $orange;
+}

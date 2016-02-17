@@ -1,0 +1,126 @@
+<!doctype html>
+
+<head>
+  <title>FastQ Screen Report</title>
+  <style type="text/css">
+    body {
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #333;
+      background-color: #fff;
+    }
+    .wrapper {
+      overflow: hidden;
+      height: 100%;
+      max-height: 100%;
+    }
+    .wrapper--table {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 500px;
+      height: 100%;
+      overflow: auto;
+      background: #f5f5f5;
+      color: white;
+    }
+    .wrapper--png {
+      position: fixed;
+      top: 0;
+      left: 500px;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      box-shadow: inset 1px 0px 1px 0px rgba(36, 36, 36, 0.4);
+    }
+    #png_img {
+      position: absolute;
+      left: 50%;
+      top: 45px;
+      margin-left: -225px;
+    }
+    .hilite {background-color: #fcf8e3;}
+    td, th {
+      padding: 8px;
+      line-height: 1.4;
+      vertical-align: middle;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      display: table-cell;
+    }
+    th {
+      background-color: rgb(56, 179, 223);
+      color: #f5f5f5;
+    }
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    tr:hover {
+      background-color: #eee;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="wrapper--table">
+      <table>
+        <tr>
+          <th>FastQ Screen</th>
+        </tr>
+        {% for png_name, png_path in pngs.iteritems() -%}
+        <tr>
+          <td id="row_{{loop.index}}">
+            <a href="javascript:loadPNG({{loop.index}}, '/api/fs/png?embed=false&path={{png_path}}')">{{ png_name }}</a>
+          </td>
+        </tr>
+        {%- endfor %}
+        </tr>
+      </table>
+    </div>
+    <div class="wrapper--png">
+      <img id="png_img" class="media--item img-thumbnail" src=""/>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var xidx = -1;
+    var displayPNG = function(idx, data) {
+      if(xidx > -1) {
+        document.getElementById('row_'+xidx).className = '';
+      }
+      document.getElementById('row_'+idx).className = 'hilite';
+      document.getElementById('png_img').src = data;
+      xidx = idx;
+    }
+
+    var loadPNG = function(idx, path) {
+      var xmlhttp;
+
+      if (window.XMLHttpRequest) {
+          // code for IE7+, Firefox, Chrome, Opera, Safari
+          xmlhttp = new XMLHttpRequest();
+      } else {
+          // code for IE6, IE5
+          xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+      }
+
+      xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+            if(xmlhttp.status == 200){
+                displayPNG(idx, xmlhttp.responseText);
+            }
+          }
+      }
+
+      xmlhttp.open('GET', path, true);
+      xmlhttp.send();
+    };
+  </script>
+</body>
+</html>

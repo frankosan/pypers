@@ -1,0 +1,118 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: $sidebar-bkgd;
+  color: $sidebar-text-color;
+  width: $sidebar-width;
+  z-index: $z-sidebar;
+  opacity: 1;
+  transition: opacity $trans-duration $trans-timing-function;
+
+
+  .nav {
+    position: absolute;
+    bottom: 0;
+  }
+
+  &.hidden {
+    opacity: 0;
+    // left: -1 * $sidebar-width;
+  }
+  &.back {
+    z-index: $z-container - 1;
+  }
+}
+
+.sidebar-block {
+  width: $sidebar-width;
+  line-height: 1.5rem;
+  text-align: center;
+  font-size: 1.75rem;
+  background:$sidebar-bkgd;
+}
+
+
+.sidebar--link,
+%sidebar--link {
+  display: flex;
+  align-items: center;
+
+  transition: all 300ms linear;
+  transition-delay: 500ms;
+  max-width: $sidebar-width;
+
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 1rem 0;
+
+  background-color: $sidebar-bkgd;
+  color: $body-bg;
+
+  .fa {
+    font-size: 1.75rem;
+    flex: 1 0 $sidebar-width;
+    text-align: center;
+  }
+  .sidebar--link__action {
+    padding-right: 1rem;
+    margin-left: .5rem;
+    flex: 0 1 auto;
+    .fa {
+      cursor: pointer;
+      font-size: 1.5rem;
+      &:hover {
+        color: $blue-light;
+      }
+    }
+  }
+  .sidebar--link__title {
+    display: flex;
+    align-items: center;
+    padding: 0 3rem 0 0;
+    font-size: 1rem;
+    > span {
+      flex: 1 0 auto;
+    }
+  }
+
+  &:hover:not(.active) {
+    color: $body-bg;
+    max-width: 20rem;
+    border-radius: 0 3px 3px 0;
+  }
+
+  &.active {
+    background-color: $body-bg;
+    font-weight: bold;
+    color: $sidebar-bkgd;
+    box-shadow: 2px 0 0 0 $body-bg;
+  }
+}
+
+.sidebar--nihs-logo {
+  position: absolute;
+  bottom: 0;
+  background: $white;
+  align-self: flex-end;
+  padding: 1rem;
+
+  img {
+    max-width: 100%;
+  }
+}
+
+.sidebar--brand {
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+  display: block;
+  text-align: center;
+  text-indent: -999999px;
+  color: $white;
+  font-size: 2rem;
+  background: url(/images/flock-bird-white.png) no-repeat center center; //, radial-gradient(ellipse at center, $blue 0%, $sidebar-bkgd 75%) $sidebar-bkgd;
+  background-size: 100% auto; //, auto auto;
+  height: auto;
+  padding: 1rem 0 .5rem 0;
+}

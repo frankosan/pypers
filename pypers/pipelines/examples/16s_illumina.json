@@ -1,0 +1,23 @@
+{
+    "name": "16s_illumina",
+    "label": "16S Illumina",
+    "dag": {
+        "nodes": {
+            "fofn2Files"    : "functions.Fofn2Files",
+            "sffinfo"       : "mothur.MothurSffinfo",
+            "trim_flows"    : "mothur.MothurTrimFlows"
+        },
+        "edges": [
+            {
+                "from"     : "fofn2Files",
+                "to"       : "sffinfo",
+                "bindings" : { "sffinfo.input_sff" : "fofn2Files.output_files" }
+            },
+            {
+                "from"     : "sffinfo",
+                "to"       : "trim_flows",
+                "bindings" : { "trim_flows.input_flow" : "sffinfo.output_files" }
+            }
+        ]
+    }
+}

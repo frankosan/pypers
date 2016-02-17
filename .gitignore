@@ -1,0 +1,74 @@
+.DS_Store
+*.py[cod]
+
+.*.swp
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+var
+sdist
+develop-eggs
+.installed.cfg
+lib64
+
+#pid
+supervisord.pid
+gunicorn.pid
+
+#spyder
+.spyderworkspace
+
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+
+.spyderworkspace
+
+#intelliJ
+.idea
+Log.out
+
+# Packageo
+
+# Sphinx artefacts
+sphinx_docs
+
+# Front end stuff
+node_modules
+!node_modules/app
+dist
+.tmp
+.sass-cache
+bower_components
+*.log
+
+# SSHFS files
+*.fuse_hidden*
+*.nfs*
+
+tags
+s
+
+

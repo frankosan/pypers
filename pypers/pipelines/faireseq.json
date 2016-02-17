@@ -1,0 +1,54 @@
+{
+    "name": "faire_seq", 
+    "label": "FAIRE-Seq",
+    "dag": {
+        "nodes": {
+            "tagdust"       : "assembly.TagDust",
+            "bowtie2"       : "mapping.bowtie2" ,
+            "bamcheck"      : "samtools.BamCheck",
+            "plotbamcheck"  : "samtools.PlotBamCheck",
+            "bam2bed"       : "bedtools.Bam2Bed",
+            "fseq"          : "peak_calling.Fseq",
+            "genomecov"     : "bedtools.GenomeCov",
+            "bgtobw"        : "utils.BedgraphToBigwig"
+        }, 
+        "edges": [
+          {
+            "from"     : "tagdust",
+            "to"       : "bowtie2",
+            "bindings" : { "bowtie2.input_fq1" : "tagdust.output_fq1", 
+                           "bowtie2.input_fq2" : "tagdust.output_fq2" }
+          },
+          {
+            "from"     : "bowtie2",
+            "to"       : "bamcheck",
+            "bindings" : { "bamcheck.input_files" : "bowtie2.output_bam" }
+          },
+          {
+            "from"     : "bamcheck",
+            "to"       : "plotbamcheck",
+            "bindings" : { "plotbamcheck.input_files"  : "bamcheck.output_files" }
+          },
+          {
+            "from"     : "bowtie2",
+            "to"       : "bam2bed",
+            "bindings" : { "bam2bed.input_bam" : "bowtie2.output_bam" }
+          },
+          {
+            "from"       : "bam2bed",
+            "to"     : "fseq",
+            "bindings" : { "fseq.input_bed" : "bam2bed.output_bed" }
+          },
+          {
+            "from"     : "bowtie2",
+            "to"       : "genomecov",
+            "bindings" : { "genomecov.input_bam" : "bowtie2.output_bam" }
+          },
+          {
+            "from"     : "genomecov",
+            "to"       : "bgtobw",
+            "bindings" : { "bgtobw.input_bg" : "genomecov.output_bg" }
+          }
+        ]
+    } 
+}

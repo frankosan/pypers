@@ -1,0 +1,48 @@
+.dag-container {
+    position: relative;
+    height: 100%;
+
+    .action-bar {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        height: auto;
+        padding: .5rem;
+
+        border-radius: 5px;
+
+        background-color: rgba($blue-dark, .2);
+
+        a {
+            &:hover {
+                background-color: $blue;
+                color: white;
+            }
+            background-color: rgba($blue, .6);
+            color: $white;
+            padding: .2rem .5rem;
+            border-right: 1px inset;
+            &:first-child {
+                padding-left: .5rem;
+                border-radius: 5px 0 0 5px;
+            }
+            &:last-child {
+                border-right: none;
+                padding-right: .5rem;
+                border-radius: 0 5px 5px 0;
+            }
+        }
+    }
+}
+#cy {
+    position: absolute;
+    height: 100%; width: 100%;
+    top: 0; left: 0;
+    border-radius: 5px;
+
+    // background-color: #EDF1FA;
+
+    box-shadow: 1px 1px 0px 0px $gray-light;
+    overflow: hidden;
+}
+

@@ -1,0 +1,367 @@
+$card-blocks-width: 24rem;
+$card-blocks-height: 12rem;
+$card-blocks-progress-bar-height: .7rem;
+$card-blocks-header-height: 5rem;
+
+$card-list-width: 100%;
+$card-list-height: 14rem;
+$card-list-progress-bar-height: .7rem;
+$card-list-header-height: 5rem;
+
+.runs-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+
+    .more-link {
+        flex: 0 0 100%;
+        display: block;
+        i {
+            text-shadow: 1px 1px 0 $white;
+            color: $gray-dark;
+            cursor: pointer;
+            box-shadow: 0 0 1px 0 rgba($black, .3);
+            background-color: darken($body-bg, 4%);
+            width: 1.8rem;
+            height: .1.8rem;
+            border-radius: 1rem;
+            line-height: 1.8rem;
+            &:hover {
+                background-color: darken($body-bg, 6%);
+            }
+        }
+        text-align: center;
+        // padding: .5rem;
+        margin: auto;
+    }
+
+    .view-switch {
+        position: fixed;
+        background-color: white;
+        right: 5rem;
+        top: 1rem;
+        z-index: 10;
+
+        width: 2rem;
+        height: 2rem;
+        line-height: 2rem;
+        text-align: center;
+
+        border-radius: 1rem;
+    }
+
+    .search-bar {
+        @include search-bar;
+
+        &:focus {
+            @include search-bar-open;
+        }
+
+        &.open{
+            @include search-bar-open;
+        }
+
+        position: fixed;
+        background-color: white;
+        right: 7.5rem;
+        top: 1rem;
+        z-index: 10;
+    }
+
+    &.blocks .run {
+        flex: 0 0 $card-blocks-width;
+        height: $card-blocks-height;
+        .run-progress-bar {
+            width: $card-blocks-width;
+            height: $card-blocks-progress-bar-height;
+            margin-top: -1 * $card-blocks-progress-bar-height/2;
+        }
+        .run-header {
+            height: $card-blocks-header-height;
+        }
+        .run-body {
+            height: $card-blocks-height - $card-blocks-header-height - $card-blocks-progress-bar-height/2;
+
+            .run-metas {
+                &:hover {
+                    .project-desc {
+                        flex: 0 0 0rem;
+                    }
+                    .time-infos {
+                        opacity: 1;
+                    }
+                }
+                .time-infos {
+                    opacity: 0;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                }
+            }
+
+        }
+    }
+    &.list .run {
+        flex: 0 0 $card-list-width;
+        height: $card-list-height;
+        .run-progress-bar {
+            width: $card-list-width;
+            height: $card-list-progress-bar-height;
+            margin-top: -1 * $card-list-progress-bar-height/2;
+        }
+        .run-header {
+            height: $card-list-header-height;
+        }
+        .run-body {
+            height: $card-list-height - $card-list-header-height - $card-blocks-progress-bar-height/2;
+
+            .run-metas {
+                .time-infos {
+                    display: block;
+                    float: right;
+                }
+            }
+        }
+    }
+    .run {
+        transition: flex $trans-duration $trans-timing-function;
+
+        cursor: pointer;
+        position: relative;
+        margin: 0 2rem 2rem 0;
+
+        background: darken($body-bg, 4%);
+        box-shadow: 0 0 1px 0 rgba($black, .3);
+
+        &:hover {
+            background-color: lighten($blue-light, 2%);
+            box-shadow: 0 0 1px 1px rgba($blue, .6);
+            .run-id { color: $blue-dark; }
+
+            .run-type span {
+                box-shadow: 0 0 1px 1px rgba($blue, .6);
+            }
+        }
+
+
+        &.succeeded {
+            .run-jobs-info { display: none !important; }
+        }
+
+        .run-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 1rem;
+            width: 100%;
+            background-color: $white;
+        }
+
+        .run-id {
+            color: $blue;
+            font-size: 2rem;
+            flex: 0 1 auto;
+            margin-right: 1rem;
+        }
+
+        .run-type {
+            font-size: 1rem;
+            position: absolute;
+            text-align: right;
+            left: 0;
+            right: 1rem;
+            top: -.5rem;
+            // transform: rotate(-45deg);
+
+            span {
+                color: $blue-dark;
+                text-shadow: 1px 1px 0 $white;
+                padding: .3rem;
+                background-color: $blue-light;
+                border-radius: 5px;
+                box-shadow: 0 0 1px 1px rgba($gray-light, .6);
+            }
+        }
+
+        .run-header-info {
+            flex: 1 1 auto;
+            padding-left: .5rem;
+            color: $gray;
+
+            > div {
+                padding-bottom: 2px;
+            }
+        }
+
+        .run-status {
+            flex: 0 0 2rem;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 0 $white;
+            text-align: center;
+
+            .run-perc {
+                color: $blue;
+                font-size: .8rem;
+                font-weight: 700;
+                background-color: $blue-light;
+                width: 2rem;
+                height: 2rem;
+                line-height: 2rem;
+                border-radius: 1rem;
+                text-align: center;
+            }
+            .fa       { font-size: 2rem; }
+            .fa-exclamation { color: $gray-dark;  text-shadow: 1px 1px 0 $gray-light;}
+            .fa-ellipsis-h { color: $gray;  text-shadow: 1px 1px 0 $gray-light;}
+            .fa-flag  { color: $red;  text-shadow: 1px 1px 0 $gray;}
+            .fa-check { color: $blue;  text-shadow: 1px 1px 0 $gray;}
+            .fa-trash, .fa-pause, .fa-play {
+                display: none;
+            }
+            .fa-trash { color: $red;  }
+            .fa-pause { color: $gray-dark; text-shadow: 1px 1px 0 $gray-light;}
+            .fa-play  { color: $blue; text-shadow: 1px 1px 0 $gray-light;}
+        }
+
+        &.run__mine {
+            &.failed .run-status:hover {
+                cursor: pointer;
+                .fa-flag  { display: none;  }
+                .fa-trash { display: block; }
+            }
+            &.running .run-status:hover {
+                cursor: pointer;
+                .run-perc  { display: none;  }
+                .fa-pause { display: block; }
+            }
+            &.interrupted .run-status:hover {
+                cursor: pointer;
+                .fa-exclamation  { display: none;  }
+                .fa-play { display: block; }
+            }
+        }
+
+        .run-updn-layer {
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+            background-color: rgba($gray-lighter, .8);
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+
+            .fa {
+                font-size: 3rem;
+                color: $gray-dark;
+            }
+
+        }
+        &.run__updn {
+            .run-updn-layer {
+                display: flex;
+            }
+        }
+
+
+        .run-progress-bar {
+            transition: width $trans-duration $trans-timing-function;
+            position: relative;
+        }
+
+        .run-body {
+            display: flex;
+            flex-direction: row;
+
+            overflow: hidden;
+
+            .run-metas {
+                padding: 1rem .5rem .5rem 1rem;
+                flex: 1 0 14.8rem;
+                overflow: hidden;
+
+                display: flex;
+                flex-direction: column;
+
+                .project-name {
+                    flex: 0 0 1.5rem;
+                    font-size: 1.2rem;
+                    color: $blue;
+                    white-space: nowrap;
+                    text-shadow: 1px 1px 0 $white;
+                }
+
+                .project-desc {
+                    // transition: flex $trans-duration $trans-timing-function;
+                    overflow: hidden;
+                    flex: 0 0 3rem;
+                    // font-style: oblique;
+                    font-size: .8rem;
+                    text-shadow: 1px 1px 0 $white;
+                    color: $gray-dark;
+                    // margin-left: .5rem;
+
+                    display: flex;
+                    align-items: center;
+                }
+
+                .time-infos {
+                    // transition: opacity $trans-duration $trans-timing-function;
+                    text-shadow: 1px 1px 0 $white;
+                    flex: 1 0 1.5rem;
+                    font-size: .8rem;
+                    color: $gray-dark;
+
+                    .time-info {
+                        padding-bottom: .3rem;
+                        .fa {
+                            width: 1rem;
+                            font-size: .9rem;
+                            margin-right: .5rem;
+                        }
+                    }
+                }
+
+            }
+
+
+            .run-jobs-info {
+                @include jagged(darken($body-bg, 4%), 20, left, border, inside);
+                padding: 1rem;
+                flex: 0 1 9.2rem;
+                background-color: darken($body-bg, 12%); //rgba($blue-light, .6);
+
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+
+                .run-job-info {
+                padding-bottom: .2rem;
+
+                &.info-succeeded { color: $green; }
+                &.info-running { color: $blue-dark; }
+                &.info-failed { color: $red; }
+                &.info-0, &.info- {
+                    color: $gray;
+                    opacity: .8;
+
+                    em { font-weight: normal; }
+                }
+                }
+
+                em {
+                font-weight: bold;
+                display: inline-block;
+                width: 2rem;
+                text-align: right;
+                font-style: normal;
+                }
+            }
+        }
+    }
+}
+
+
+

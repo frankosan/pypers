@@ -1,0 +1,76 @@
+{
+    "name": "assembly",
+    "label": "Assembly",
+    "dag": {
+        "nodes": {
+            "bayes_hmer": "assembly.BayesHammer", 
+            "quast": "assembly.QUAST", 
+            "spades": "assembly.SPAdes", 
+            "spades_sspace": "assembly.SSPACE", 
+            "velvet": "assembly.Velvet", 
+            "velvet_sspace": "assembly.SSPACE"
+        },
+        "edges": [
+            {
+                "bindings": {
+                    "velvet.input_fq1": "bayes_hmer.output_fq1", 
+                    "velvet.input_fq2": "bayes_hmer.output_fq2"
+                }, 
+                "from": "bayes_hmer", 
+                "to": "velvet"
+            }, 
+            {
+                "bindings": {
+                    "velvet_sspace.input_contigs": "velvet.output_contigs"
+                }, 
+                "from": "velvet", 
+                "to": "velvet_sspace"
+            }, 
+            {
+                "bindings": {
+                    "velvet_sspace.input_fq1": "bayes_hmer.output_fq1", 
+                    "velvet_sspace.input_fq2": "bayes_hmer.output_fq2"
+                }, 
+                "from": "bayes_hmer", 
+                "to": "velvet_sspace"
+            }, 
+            {
+                "bindings": {
+                    "spades.input_fq1": "bayes_hmer.output_fq1", 
+                    "spades.input_fq2": "bayes_hmer.output_fq2"
+                }, 
+                "from": "bayes_hmer", 
+                "to": "spades"
+            }, 
+            {
+                "bindings": {
+                    "spades_sspace.input_contigs": "spades.output_contigs"
+                }, 
+                "from": "spades", 
+                "to": "spades_sspace"
+            }, 
+            {
+                "bindings": {
+                    "spades_sspace.input_fq1": "bayes_hmer.output_fq1", 
+                    "spades_sspace.input_fq2": "bayes_hmer.output_fq2"
+                }, 
+                "from": "bayes_hmer", 
+                "to": "spades_sspace"
+            }, 
+            {
+                "bindings": {
+                    "quast.input_contigs": "velvet_sspace.output_contigs"
+                }, 
+                "from": "velvet_sspace", 
+                "to": "quast"
+            }, 
+            {
+                "bindings": {
+                    "quast.input_contigs": "spades_sspace.output_contigs"
+                }, 
+                "from": "spades_sspace", 
+                "to": "quast"
+            }
+        ] 
+    }
+}

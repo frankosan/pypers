@@ -1,0 +1,3 @@
+biom-format==1.3.1
+cogent
+git+https://github.com/picrust/picrust.git@v1.0.0#egg=PICRUSt

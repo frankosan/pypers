@@ -1,0 +1,23 @@
+{
+    "dag": {
+        "load" : "nespipe/pipelines/rnaseq.json"
+    },
+    "config" : {
+        "pipeline" : {
+            "output_dir"   : "/scratch/rdjoycech/test_rnaseq/",
+            "refgenome"    : "human hs_GRch37_r66",
+            "project_name" : "TestRnaSeq",
+            "description"  : "Test run for RnaSeq",
+            "delete": []
+        },
+        "steps": {
+            "inputs": {
+                "input_dirs" : ["/nihs/Development/cgi/integration_tests/rna_seq/input_data"]
+            },
+           "rnaseq_qc" : {
+                "transcript_gtf" : "/nihs/Development/cgi/rna-seqc/ref/gencode.v19.annotation.gtf"
+            }
+        }
+    }
+}
+

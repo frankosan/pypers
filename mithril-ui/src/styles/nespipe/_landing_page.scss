@@ -1,0 +1,191 @@
+.landing-page {
+  position: absolute;
+  overflow: hidden;
+  right: 2rem;
+  left: 2rem;
+
+  .pipeline-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 1500px;
+
+    &:not(.top) {
+        .pipeline {
+            max-width: 33%;
+        }
+    }
+
+    &.top {
+        border-bottom: 1px inset;
+        .pipeline:not(.ghost) {
+            background-color: rgba(211, 231, 245, .6);
+            box-shadow: 0 0 1px 0 rgba($black, .3);
+            height: 15rem;
+
+            .flex-row {
+                flex-direction: row;
+                display: flex;
+
+                .pipeline-label {
+                    flex: 0 0 auto;
+                    margin: 0;
+                    padding: 0.5rem 1rem 0rem;
+                    font-size: 1.0rem;
+                    text-shadow: 1px 1px 0 $white;
+                    font-weight: bold;
+                    color: $blue;
+                }
+
+                .stat-total {
+                  padding: 1rem;
+                }
+                .pipeline-stat {
+                    height: auto;
+                    &:first-child {
+                        border-right: 1px solid darken(rgb(211, 231, 245), 4%);
+                    }
+                }
+            }
+
+            &:hover {
+                background-color: rgba(211, 231, 245, 1);
+                box-shadow: 0 0 1px 1px rgb(132, 198, 245);
+            }
+            .pipeline-label {
+                font-style: oblique;
+                color: $blue;
+            }
+        }
+    }
+    .pipeline {
+      transition: background $trans-duration $trans-timing-function;
+      flex: 1 0 30%;
+      // max-width: 33%;
+      @include MQ(S) {
+        flex: 1 0 90%;
+      }
+      margin: 1rem 0 1rem 2rem;
+      height: 12rem;
+
+      &:not(.ghost) {
+        box-shadow: 0 0 1px 0 rgba($black, .3);
+        background: darken($body-bg, 4%);
+        &:hover {
+            cursor: default;
+            background: lighten($blue-light, 2%);
+            box-shadow: 0 0 1px 1px rgba($blue, .6);
+
+            .active {
+            color: $blue !important;
+            }
+
+            .new { display: block !important; }
+            .status { display: none; }
+        }
+      }
+
+      display: flex;
+      flex-direction: column;
+      padding-bottom: .5rem;
+
+      .pipeline-label {
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 1rem 1rem .5rem;
+        font-size: 1.5rem;
+        text-shadow: 1px 1px 0 $white;
+        font-weight: bold;
+        color: $blue;
+
+        a {
+          color: $gray;
+          &.active { color: $blue; }
+          &:hover { color: $gray; cursor: default; }
+          &.active:hover { color: $blue-dark !important; cursor: pointer; }
+        }
+
+        i.fa {
+          position: absolute;
+          color: $gray;
+          opacity: .5;
+          font-size: 2.5rem;
+          right: 1rem;
+          // margin-top: -.5rem;
+
+          &.status.running {
+              color: $blue;
+              opacity: 1;
+              animation-duration: 10s;
+          }
+
+          &.new {
+            opacity: 1;
+            transition: all $trans-duration $trans-timing-function;
+            cursor: pointer;
+            display: none;
+            color: darken($body-bg, 4%);
+            text-shadow: none;
+            font-size: 1.5rem;
+            padding: .5rem;
+            border-radius: 2rem;
+            background-color: rgba($green, .8);
+            &:hover {
+                background-color: rgba($green, 1);
+                color: white;
+            }
+          }
+        }
+      }
+
+      .stat-total {
+        color: $gray;
+        text-shadow: 1px 1px 0 $white;
+        font-style: italic;
+
+        &.active:hover {
+          cursor: pointer;
+          color: $blue-dark !important;
+        }
+        flex: 0 0 auto;
+        text-align: right;
+      }
+
+      .pipeline-stat {
+        flex: 1 0 auto;
+        @include clearfix;
+        height: 5rem;
+        .stat-detail {
+          padding: .5rem .5rem 0;
+          font-size: .85rem;
+
+          color: $gray-dark;
+          cursor: default;
+
+          opacity: .5;
+          text-shadow: 1px 1px 0 $white;
+
+          width: 8rem;
+          margin-left: 1.5rem;
+
+          &.active { opacity: 1; }
+          &.active:hover {
+            cursor: pointer;
+            color: $blue-dark !important;
+          }
+
+          em {
+            letter-spacing: 1px;
+            font-weight: 700;
+            width: 2rem;
+            display: inline-block;
+            font-style: normal;
+            float: right;
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+// -------------------------------------
+//   Alerts - custom for Flock
+// -------------------------------------
+
+.alert--age {
+  position: absolute;
+  top: -3rem;
+  left: 0;
+  right: 0;
+  transform: translateZ(0);
+
+  &.ng-hide-add,
+  &.ng-hide-remove {
+    transition: all $trans-duration $trans-timing-function;
+
+    /* remember to add this */
+    display:block!important;
+    transform: translateY(0);
+    opacity: 1;
+  }
+  &.ng-hide {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+
+  &.animate-show {
+
+  }
+
+  &.animate-show.ng-enter,
+  &.animate-show.ng-leave {
+    transition: all $trans-duration $trans-timing-function;
+  }
+
+  &.animate-show.ng-enter,
+  &.animate-show.ng-leave.ng-leave-active {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  &.animate-show.ng-leave,
+  &.animate-show.ng-enter.ng-enter-active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.alert--close {
+  position: absolute;
+  top: 50%;
+  right: .5rem;
+  margin-top: -1.5rem;
+  padding:1rem;
+  user-select: none;
+}

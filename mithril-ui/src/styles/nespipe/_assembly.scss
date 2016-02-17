@@ -1,0 +1,112 @@
+.flexbox-container-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+  max-width: 80rem;
+}
+
+.flexbox-container-row > .column1-3 {
+  justify-content: center;
+  flex : 0.28;
+  padding: 5px;
+  overflow:visible;
+}
+
+.inputs-group {
+    .input-group {
+        margin-bottom: 1rem;
+    }
+}
+
+.panel-heading {
+    color: $blue;
+    text-align: left;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.annotation, .assembly {
+    // font-family: $font-family-base;
+
+    .feedback {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: none;
+
+        &.error {
+            background-color: lighten($red, 40%);
+            color:$red;
+            border: 1px solid lighten($red, 30%);
+        }
+        &.success {
+            background-color: lighten($green, 40%);
+            color:$green;
+            border: 1px solid lighten($green, 30%);
+        }
+
+        &.error, &.success {
+            display: block;
+        }
+
+        a {
+            margin-left: 1rem;
+            font-style: oblique;
+            color: $green;
+            text-decoration: underline;
+        }
+    }
+    .step-choice {
+        opacity: .6;
+        margin-right: 1rem;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: .3rem;
+        line-height: 2rem;
+        color: $gray;
+        box-shadow: 0 1px 1px -1px rgba($black, .3);
+        &:hover {
+            color: black;
+            &:before {
+                color: $gray;
+            }
+        }
+        &:before {
+            padding: .2rem;
+            width: 2rem;
+            height: 2rem;
+            line-height: 2rem;
+            margin-right: 1rem;
+            font-family: FontAwesome;
+            content: "\f00c";
+            color: transparent;
+            border: 1px solid $gray;
+            border-radius: 1rem;
+        }
+        &.selected {
+            color: black;
+            &:before {
+                background-color: $green;
+                color: $white;
+                border-color: $green;
+            }
+        }
+    }
+
+    .btn-submit {
+        margin-top: 1rem;
+        float: right;
+    }
+}
+
+.annotation {
+    ul {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 20rem;
+    }
+    .step-choice {
+        flex: 0 0 2.7rem;
+        // width: 32%;
+    }
+}

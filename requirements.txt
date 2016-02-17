@@ -1,0 +1,31 @@
+#
+# pip requirement file for NESPIPE
+#
+# List here GitHub packages that need to be installed and that are not part of
+# Anaconda.
+#
+
+Flask-RESTful
+gunicorn
+pymongo
+#pysam
+supervisor
+py2cytoscape
+htseq
+pylint==1.4.4
+Flask==0.10.1
+Flask-SocketIO
+#Jinja2==2.7.2
+MarkupSafe==0.18
+Werkzeug==0.9.4
+gevent==1.0
+gevent-socketio==0.3.6
+gevent-websocket==0.9.2
+greenlet==0.4.2
+itsdangerous==0.23
+ujson==1.33
+PyVCF
+
+# used by CI
+#pylint
+#nosexcover

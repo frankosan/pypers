@@ -1,0 +1,71 @@
+{
+    "name":    "demultiplexing",
+    "label":   "Demultiplexing",
+    "inputs" : [
+        {
+            "name"     : "input_dir",
+            "type"     : "dir",
+            "descr"    : "the input directory"
+        }
+    ],
+    "dag": {
+        "nodes": {
+            "validateSampleSheet"   : "functions.ValidateSampleSheet",
+            "casava"                : "demux.CasavaDemux",
+            "pairbyread"            : "functions.PairByRead",
+            "fastqc"                : "qc.FastQc",
+            "fastqcreport"          : "qc.FastQCReport",
+            "fastqscreen"           : "qc.FastqScreen",
+            "fastqscreenreport"     : "qc.FastqScreenReport"
+        },
+        "edges": [
+            {
+                "from"     : "inputs",
+                "to"       : "casava",
+                "bindings" : { "casava.input_dir" : "inputs.input_dir" }
+            },
+            {
+                "from"     : "inputs",
+                "to"       : "validateSampleSheet",
+                "bindings" : { "validateSampleSheet.input_dir" : "inputs.input_dir" }
+            },
+            {
+                "from"     : "validateSampleSheet",
+                "to"       : "casava",
+                "bindings" : { "casava.sample_sheet" : "validateSampleSheet.output_files" }
+            },
+            {
+                "from"     : "casava",
+                "to"       : "fastqc",
+                "bindings" : { "fastqc.input_files" : "casava.output_files" }
+            },
+            {
+                "from"     : "fastqc",
+                "to"       : "fastqcreport",
+                "bindings" : {
+                  "fastqcreport.html_reports"     : "fastqc.html_reports",
+                  "fastqcreport.detailed_reports" : "fastqc.detailed_reports",
+                  "fastqcreport.summary_reports"  : "fastqc.summary_reports"
+                }
+            },
+            {
+                "from"     : "casava",
+                "to"       : "pairbyread",
+                "bindings" : { "pairbyread.input_files" : "casava.output_files" }
+            },
+            {
+                "from"     : "pairbyread",
+                "to"       : "fastqscreen",
+                "bindings" : { "fastqscreen.input_files" : "pairbyread.output_files" }
+            },
+            {
+                "from"     : "fastqscreen",
+                "to"       : "fastqscreenreport",
+                "bindings" : {
+                    "fastqscreenreport.txt_files" : "fastqscreen.txt_files",
+                    "fastqscreenreport.png_files" : "fastqscreen.png_files"
+                }
+            }
+        ]
+    }
+}

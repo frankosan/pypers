@@ -1,0 +1,24 @@
+{
+    "dag": {
+        "load" : "rna_seq"
+    },
+    "config" : {
+        "pipeline"    : {
+            "output_dir"    : "/scratch/rdrongafr/test_rnaseq/",
+            "refgenome"     : "human hs_GRch37_r66",
+            "copyfiles_":   [ "coverage" ],
+            "deletefiles_": [ "sam2bam" ],
+            "project_name" : "TestRnaSeq",
+            "description"  : "And another test run for RnaSeq"
+        },
+        "steps" : {
+            "inputs": {
+                "input_dirs" : ["/nihs/Development/cgi/integration_tests/rna_seq/input_data"]
+            },
+           "rnaseq_qc" : {
+                "transcript_gtf" : "/nihs/Development/cgi/rna-seqc/ref/gencode.v19.annotation.gtf"
+            }
+        }
+    }
+}
+

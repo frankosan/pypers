@@ -1,0 +1,144 @@
+{
+    "name": "rna_seq",
+    "label": "RNASeq",
+    "inputs": [
+        {
+            "name": "input_dirs",
+            "type": "dir",
+            "descr": "the input directories containing sample sheets",
+            "iterable": true
+        }
+    ],
+    "dag": {
+        "nodes": {
+            "findFastq"     : "utils.Find",
+            "sortBySample"  : "functions.SortBySample",
+            "pigz"          : "utils.PigZip",
+            "pairByRead"    : "functions.PairByRead",
+            "rna_star"      : "mapping.RnaStar",
+            "star_report"   : "qc.StarReport",
+            "sam2bam"       : "samtools.Sam2Bam",
+            "cleansam"      : "picard.CleanSam",
+            "groupBySample" : "functions.GroupBySample",
+            "bamcheck"      : "samtools.BamCheck",
+            "plotbamcheck"  : "samtools.PlotBamCheck",
+            "bammerge"      : "samtools.BamMerge",
+            "m_bamcheck"    : "samtools.BamCheck",
+            "m_plotbamcheck": "samtools.PlotBamCheck",
+            "htseqcov1"     : "genome_count.HtseqCount",
+            "exonscount"    : "exons_count.DseqCount",
+            "reordersam"    : "picard.ReorderSam",
+            "addreadgroups" : "picard.AddReadGroups",
+            "rnaseq_qc"     : "qc.RnaSeqQC"
+
+        },
+        "edges": [
+            {
+                "from"     : "inputs",
+                "to"       : "findFastq",
+                "bindings" : { "findFastq.input_dirs": "inputs.input_dirs" }
+            },
+            {
+                "from"     : "findFastq",
+                "to"       : "sortBySample",
+                "bindings" : { "sortBySample.input_files" : "findFastq.output_files" }
+            },
+            {
+                "from"     : "sortBySample",
+                "to"       : "pigz",
+                "bindings" : { "pigz.input_files":"sortBySample.output_files" }
+            },
+            {
+                "from"     : "pigz",
+                "to"       : "pairByRead",
+                "bindings" : { "pairByRead.input_files":"pigz.output_files" }
+            },
+            {
+                "from"     : "pairByRead",
+                "to"       : "rna_star",
+                "bindings" : { "rna_star.input_files":"pairByRead.output_files" }
+            },
+            {
+                "from"     : "rna_star",
+                "to"       : "sam2bam",
+                "bindings" : { "sam2bam.input_files" : "rna_star.output_sams" }
+            },
+            {
+                "from"     : "rna_star",
+                "to"       : "star_report",
+                "bindings" : { "sam2bam.stats_files" : "rna_star.output_stats" }
+            },
+            {
+                "from"     : "sam2bam",
+                "to"       : "cleansam",
+                "bindings" : { "cleansam.input_files" : "sam2bam.output_files" }
+            },
+            {
+                "from"     : "cleansam",
+                "to"       : "bamcheck",
+                "bindings" : { "bamcheck.input_files" : "cleansam.output_files" }
+            },
+            {
+                "from"     : "bamcheck",
+                "to"       : "plotbamcheck",
+                "bindings" : { "plotbamcheck.input_files" : "bamcheck.output_files" }
+            },
+            {
+                "from"     : "cleansam",
+                "to"       : "groupBySample",
+                "bindings" : { "groupBySample.input_files" : "cleansam.output_files" }
+            },
+            {
+                "from"     : "groupBySample",
+                "to"       : "bammerge",
+                "bindings" : { "bammerge.input_files" : "groupBySample.output_files" }
+            },
+            {
+                "from"     : "bammerge",
+                "to"       : "htseqcov1",
+                "bindings" : { "htseqcov1.input_files" : "bammerge.output_files" }
+            },
+            {
+                "from"     : "bammerge",
+                "to"       : "exonscount",
+                "bindings" : { "exonscount.input_files" : "bammerge.output_files" }
+            },
+            {
+                "from"     : "bammerge",
+                "to"       : "m_bamcheck",
+                "bindings" : { "m_bamcheck.input_files" : "cleansam.output_files" }
+            },
+            {
+                "from"     : "m_bamcheck",
+                "to"       : "m_plotbamcheck",
+                "bindings" : { "m_plotbamcheck.input_files" : "m_bamcheck.output_files" }
+            },
+            {
+                "from"     : "cleansam",
+                "to"       : "reordersam",
+                "bindings" : { "reordersam.input_bam" : "cleansam.output_files" }
+            },
+            {
+                "from"     : "reordersam",
+                "to"       : "addreadgroups",
+                "bindings" : { "addreadgroups.input_bam" : "reordersam.output_bam" }
+            },
+            {
+                "from"     : "addreadgroups",
+                "to"       : "rnaseq_qc",
+                "bindings" : { "rnaseq_qc.input_bams" : "addreadgroups.output_bam" }
+            }
+        ]
+    },
+    "config": {
+        "pipeline": {
+            "delete": [ "sam2bam" ]
+        },
+        "steps": {
+            "findFastq" : {
+                "pattern" : "^(.*)_([ATCG-]*?)_(L\\d{3}?)_(R\\d{1}?)_(\\d{3}).fastq.gz",
+                "regex_match" : true
+            }
+        }
+    }
+}
