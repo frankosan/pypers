@@ -1,4 +1,4 @@
-## Mithril Boilerplate
+## BAed on Mithril Boilerplate (https://github.com/ng-vu/mithril-boilerplate)
 
 This is a quick starter template coupled with NodeJS build tools for projects that want to use Leo Horie's
 [Mithril](http://lhorie.github.io/mithril/index.html) framework.

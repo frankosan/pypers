@@ -16,46 +16,31 @@ The software installation for code development purposes involves 1) setting up a
 
 ### Prerequisites
 
-The procedure described below assumes an already fully setup CGI workspace:
-* a virtual machine with...
+The procedure described below assumes an already fully setup workspace:
+* a machine with...
    * `sudo` rights (*)
       *  `requiretty` and `secure_path` should be commented out in the sudoers file (edit it with `sudo visudo`)
-   * mongodb [installed](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-red-hat-centos-or-fedora-linux/):
-      * this requires a specific yum repository. Create file ` /etc/yum.repos.d/mongodb-org-3.0.repo` with the following contents:
-      ```
-[mongodb-org-3.0]
-name=MongoDB Repository
-baseurl=http://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.0/x86_64/
-gpgcheck=0
-enabled=1
-      ```
-      * then run `yum install mongodb-org`
-      * edit `/etc/mongod.conf`, adding the following line: `smallfiles = true`, and commenting out the `bind_ip` statement
-   * nodejs and dependencies: 
-      * install nodejs: `yum install npm`
-      * install gulp: `npm install -g gulp`
-* commit rights to the Pypers git repository (*)
-* JIRA, Bamboo, and wiki access/editing rights (*)
-
+   * `node and npm` installed
+   * `bower` installed
+   * mongodb 
+   
 (*) only needed for development and testing
 
 ### Creating a new virtual environment
 
 * Create a new ''virtual environment'' based on the central install:
   ```
-conda create -p <path to environment> --yes --clone /nihs/Development/cgi/software/Anaconda-2.4.0
+conda create -p <path to environment> --yes --clone <path to anaconda>
   ```
-(`path to environment` needs to be empty; example: `/nihs/Bioinformatics_home/<user>/envs/dev`)
 * Activate the environment as shown below
 
 ### Activating an Existing Environment
 
 After a first installation, the installed environment can easily be setup by running: 
 ```
-export PATH=/nihs/Development/cgi/software/Anaconda-2.4.0/bin:${PATH}
+export PATH=<path to anaconda>/bin:${PATH}
 source activate <path to environment>
 export ACME_LCL=1
-export PATH=${PATH}:/sonas/Software/NIHS/js/bin/
 ```
 
 ### Deploying the software
@@ -64,4 +49,4 @@ After modifying the code, one has to deploy the new executables to the virtual e
 ```
 python ./setup.py develop
 ```
-Note that this only applies to the `nihspipe` software, not to the front-end.
+Note that this only applies to the `pypers` software package, not to the front-end.
