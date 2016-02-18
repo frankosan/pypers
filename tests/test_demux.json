@@ -1,16 +1,16 @@
 {
     "dag": {
-        "load" : "nespipe/pipelines/demultiplexing.json"
+        "load" : "pypers/pipelines/demultiplexing.json"
     },
     "config" : {
         "pipeline" : {
-            "output_dir" : "/scratch/rdferrarfr1/demux/",
+            "output_dir" : "/tmp/demux/",
             "project_name" : "TestDemux",
             "description"  : "Test run for Demultiplexing"
         },
         "steps" : {
             "inputs" :  {
-                "input_dir" : "/nihs/Development/cgi/integration_tests/demultiplexing/hiseq1/150507_SN1041_0147_BHL5V3ADXX"
+                "input_dir" : "/demultiplexing/150507_SN1041_0147_BHL5V3ADXX"
             }
         }
     }

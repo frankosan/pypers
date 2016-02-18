@@ -9,7 +9,7 @@ ACME_CI   = bool(os.environ.get('ACME_CI'  , False))
 ACME_LCL  = bool(os.environ.get('ACME_LCL' , False))
 
 
-MONGODB_HOST        = socket.gethostname() #'rddor-rdrongafr.nihs.ch.nestle.com' #
+MONGODB_HOST        = socket.gethostname()
 MONGODB_NAME        = 'pypers_db'
 WORK_DIR            = ROOT_DIR + '/lcl'
 

@@ -102,8 +102,6 @@ class CondorScheduler(Scheduler):
         else:
             self.log.error('Unable to derive jobId from condor output: "%s"' % out)
 
-        # just need last bit of jobid without hostname, eg
-        # rddor-rdjoycech.nihs.ch.nestle.com.8801.0 > 8801.0
         return jobId
 
 

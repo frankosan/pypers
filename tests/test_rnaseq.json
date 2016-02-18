@@ -1,10 +1,10 @@
 {
     "dag": {
-        "load" : "nespipe/pipelines/rnaseq.json"
+        "load" : "pypers/pipelines/rnaseq.json"
     },
     "config" : {
         "pipeline" : {
-            "output_dir"   : "/scratch/rdjoycech/test_rnaseq/",
+            "output_dir"   : "/tmp/test_rnaseq/",
             "refgenome"    : "human hs_GRch37_r66",
             "project_name" : "TestRnaSeq",
             "description"  : "Test run for RnaSeq",
@@ -12,10 +12,10 @@
         },
         "steps": {
             "inputs": {
-                "input_dirs" : ["/nihs/Development/cgi/integration_tests/rna_seq/input_data"]
+                "input_dirs" : ["/data/input_data"]
             },
            "rnaseq_qc" : {
-                "transcript_gtf" : "/nihs/Development/cgi/rna-seqc/ref/gencode.v19.annotation.gtf"
+                "transcript_gtf" : "/Public_data/genomes/human/gencode.v19.annotation.gtf"
             }
         }
     }

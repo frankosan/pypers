@@ -2,7 +2,7 @@
   "name": "pypers-webapp",
   "version": "0.1.5",
   "dependencies": {
-    "nihs-birdcage": "file:///nihs/Development/cgi/UX.git",
+    "bootstrap": "latest",
     "animate.css": "~3.3.0",
     "fontawesome": "~4.4.0",
     "jquery": "~2.1.4"

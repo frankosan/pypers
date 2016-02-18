@@ -18,6 +18,9 @@ sdist
 develop-eggs
 .installed.cfg
 lib64
+mithril-ui/build
+mithril-ui/dist
+
 
 #pid
 supervisord.pid

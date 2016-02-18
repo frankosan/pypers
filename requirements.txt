@@ -1,5 +1,5 @@
 #
-# pip requirement file for NESPIPE
+# pip requirement file for Pypers
 #
 # List here GitHub packages that need to be installed and that are not part of
 # Anaconda.
