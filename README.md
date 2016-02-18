@@ -7,18 +7,12 @@ A lightweight, scalable python-based pipeline execution manager combined with a 
 
 The *Pypers* package consists of two main sub-systems located in the following directories:
 * `Pypers` - contains the pipelines, steps and all their ancillary code;
-* `mithril-ui` - contains the ui framework (aka *bluebird*).
+* `mithril-ui` - contains the ui front-end 
 
-There exist three different environments:
-* **production**: corresponds to branch `master` and runs on the production server;
-* **development**: corresponds to branch `develop` and runs on the beta server;
-* **local**: is run on the local machine where code development is actually carried out and is therefore not bound to a particular branch (although it usually corresponds to a temporary, working branch).
-
-The [local installation](#local-installation) procedure focusses on the latter. 
 
 ## Local Installation
 
-The CGI software installation for code development purposes involves 1) setting up a "virtual environment", allowing for the use of concurrent versions of the software and 2) creating a clone (local repository) of the Pypers software.
+The software installation for code development purposes involves 1) setting up a "virtual environment", allowing for the use of concurrent versions of the software and 2) creating a clone (local repository) of the Pypers software.
 
 ### Prerequisites
 
