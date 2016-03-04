@@ -1,7 +1,8 @@
 'use strict';
 
 var path = require('path'),
-    os = require('os');
+    os = require('os'),
+    fs = require('fs');
 
 var rootPath = path.normalize(__dirname + '/../../..');
 
@@ -9,6 +10,24 @@ module.exports = {
   root: rootPath,
   host: os.hostname(),
   port: process.env.PORT || 3000,
+
+  services: {
+    pypers: {
+        path: '/api/pypers',
+
+        ssh: true,
+        host: 'localhost',
+        port: 5001,
+
+        auth: {
+            user: process.env.USER,
+            secret: fs.readFileSync(process.env.HOME + '/.ssh/pypers-token').toString()
+        },
+
+        rewrite: '/api'
+    }
+  },
+
   mongo: {
     options: {
       db: {
@@ -17,11 +36,11 @@ module.exports = {
     }
   },
   groups: {
-    yourldapgourp: 'yourldapgourp'
+    your_company: 'OU=string-Site,OU=Users and Groups,OU=something,OU=EUR,OU=Organizations,DC=somethinc,DC=com',
   },
   ldap: {
     server: {
-        url: 'ldaps://ldap.nestle.com:636',
+        url: 'ldaps://ldap.company.com:636',
         tlsOptions: {
             'rejectUnauthorized': false
         }

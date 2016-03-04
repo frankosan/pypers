@@ -2,108 +2,108 @@
 {
   "_id": { "species": "human", "version": "hg19" },
   "paths" : {
-      "bowtie2":  "/nihs/Public_data/genomes/Homo_sapiens/hg19/bowtie2/human19", 
-      "bedtools": "/nihs/Public_data/genomes/Homo_sapiens/hg19/bedtools/human.hg19.genome"
+      "bowtie2":  "/software/Public_data/genomes/Homo_sapiens/hg19/bowtie2/human19", 
+      "bedtools": "/software/Public_data/genomes/Homo_sapiens/hg19/bedtools/human.hg19.genome"
   }
 },
 {
   "_id": { "species": "human", "version": "hg18" },
   "paths" : {
-      "bowtie2": "/nihs/Public_data/genomes/Homo_sapiens/hg18/bowtie2/human18" 
+      "bowtie2": "/software/Public_data/genomes/Homo_sapiens/hg18/bowtie2/human18" 
   }
 },
 {
   "_id": { "species": "mouse", "version": "mm9" },
   "paths" : { 
-    "bowtie2":  "/nihs/Public_data/genomes/Mus_musculus/mm9/bowtie2/mouse9", 
-    "bedtools": "/nihs/Public_data/genomes/Mus_musculus/mm9/bedtools/mouse.mm9.genome"
+    "bowtie2":  "/software/Public_data/genomes/Mus_musculus/mm9/bowtie2/mouse9", 
+    "bedtools": "/software/Public_data/genomes/Mus_musculus/mm9/bedtools/mouse.mm9.genome"
   }
 },
 {
   "_id": { "species": "mouse", "version": "GRCm38" },
   "paths" : { 
-    "bwa":  "/nihs/Public_data/genomes/Mus_musculus/GRCm38/Sequence/BWAIndex/version0.7.4/genome.fa"
+    "bwa":  "/software/Public_data/genomes/Mus_musculus/GRCm38/Sequence/BWAIndex/version0.7.4/genome.fa"
   }
 },
 {
   "_id": { "species": "mouse", "version": "GRCm38", "variation":"MT" },
   "paths" : { 
-    "bwa":  "/nihs/Public_data/genomes/Mus_musculus/GRCm38/Sequence/BWAIndex/version0.7.4/MT.fa"
+    "bwa":  "/software/Public_data/genomes/Mus_musculus/GRCm38/Sequence/BWAIndex/version0.7.4/MT.fa"
   }
 },
 {
   "_id": { "species": "human", "version": "g1k_v37" },
   "paths" : {
-      "picard": "/nihs/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37.fasta", 
-      "gatk": "/nihs/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37.fasta",
-      "bwa": "/nihs/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37",
-      "baits_file" : "/nihs/Public_data/genomes/Homo_sapiens/Agilent/V5_UTR/S04380219_Padded.txt",
-      "gc_content" : "/nihs/Public_data/EXTERNAL_DATA/QPLOT_RESOURCES/qplot/data/human.g1k.w100.gc",
-      "dbsnp" : "/nihs/Public_data/EXTERNAL_DATA/QPLOT_RESOURCES/qplot/data/dbSNP130.UCSC.coordinates.tbl"
+      "picard": "/software/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37.fasta", 
+      "gatk": "/software/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37.fasta",
+      "bwa": "/software/Public_data/EXTERNAL_DATA/1000G_GENOME_REFERENCES/v37/GATK_bundle_v1.5/1.5/b37/human_g1k_v37",
+      "baits_file" : "/software/Public_data/genomes/Homo_sapiens/Agilent/V5_UTR/S04380219_Padded.txt",
+      "gc_content" : "/software/Public_data/EXTERNAL_DATA/QPLOT_RESOURCES/qplot/data/human.g1k.w100.gc",
+      "dbsnp" : "/software/Public_data/EXTERNAL_DATA/QPLOT_RESOURCES/qplot/data/dbSNP130.UCSC.coordinates.tbl"
   }
 },
 {
   "_id": { "species": "human", "version": "hs_GRCh38_p2" },
   "paths": {
-      "STAR": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/STAR",
-      "bwa":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
-      "reordersam":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
-      "rnaseq_qc":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
-      "htseq": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Annotation/Homo_sapiens.GRCh38.80.gtf",
-      "bedtools": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Annotation/Homo_sapiens.GRCh38.80.gff"
+      "STAR": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/STAR",
+      "bwa":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
+      "reordersam":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
+      "rnaseq_qc":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Sequence/Chromosomes/Homo_sapiens.GRCh38.dna.chromosome.all.fa",
+      "htseq": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Annotation/Homo_sapiens.GRCh38.80.gtf",
+      "bedtools": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh38.p2/Annotation/Homo_sapiens.GRCh38.80.gff"
   }
 },
 {
   "_id": { "species": "human", "version": "hs_GRch37_r66" },
   "paths": {
-      "STAR": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/STAR",
-      "bwa":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
-      "reordersam":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
-      "rnaseq_qc":  "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
-      "htseq": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf",
-      "bedtools": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff"
+      "STAR": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/STAR",
+      "bwa":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
+      "reordersam":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
+      "rnaseq_qc":  "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/WholeGenomeFasta/genome.fa",
+      "htseq": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf",
+      "bedtools": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff"
   }
 },
 {
   "_id": { "species": "human", "version": "hs_GRch37_r66", "variation":"AbundantSequenceRibosome" },
   "paths": {
-      "STAR": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/AbundantSequences/Ribosome/STAR",
-      "bedtools": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff",
-      "htseq": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf"
+      "STAR": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/AbundantSequences/Ribosome/STAR",
+      "bedtools": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff",
+      "htseq": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf"
   }
 },
 {
   "_id": { "species": "human", "version": "hs_GRch37_r66","variation":"AbundantSequenceGlobin" },
   "paths": {
-      "STAR":     "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/AbundantSequences/Globin/STAR",
-      "bedtools": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff",
-      "htseq": "/nihs/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf"
+      "STAR":     "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Sequence/AbundantSequences/Globin/STAR",
+      "bedtools": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Genes/GRCh37_refGene.gff",
+      "htseq": "/software/Public_data/genomes/Homo_sapiens/hs_GRCh37_r66/Annotation/Homo_sapiens.GRCh37.66.genes.gtf"
   }
 },
 {
   "_id": { "species": "coffe_canephora", "version": "1.0" },
   "paths": {
-      "STAR":       "/nihs/Public_data/genomes/Coffea_canephora/v1.0/Sequences/STAR",
-      "bedtools": "/nihs/Public_data/genomes/Coffea_canephora/v1.0/Annotation/coffea_canephora_gene.gff3"
+      "STAR":       "/software/Public_data/genomes/Coffea_canephora/v1.0/Sequences/STAR",
+      "bedtools": "/software/Public_data/genomes/Coffea_canephora/v1.0/Annotation/coffea_canephora_gene.gff3"
     }
 },
 {
   "_id": { "species": "Theobroma_cacao", "version": "1.0" },
   "paths": {
-      "STAR":       "/nihs/Public_data/genomes/Theobroma_cacao/v1.0/Sequences/STAR",
-      "bedtools": "/nihs/Public_data/genomes/Theobroma_cacao/v1.0/Annotation/Theobroma_cacao_v1_gene.gff3"
+      "STAR":       "/software/Public_data/genomes/Theobroma_cacao/v1.0/Sequences/STAR",
+      "bedtools": "/software/Public_data/genomes/Theobroma_cacao/v1.0/Annotation/Theobroma_cacao_v1_gene.gff3"
     }
 },
 {
   "_id": { "species": "mouse (MT)", "version": "NC_005089.1" },
   "paths" : { 
-    "bwa":  "/nihs/Public_data/genomes/Mitochondrial_DNA/MT-Mouse.fa"
+    "bwa":  "/software/Public_data/genomes/Mitochondrial_DNA/MT-Mouse.fa"
   }
 },
 {
   "_id": { "species": "human (MT)", "version": "rCRS-Del" },
   "paths" : { 
-    "bwa":  "/nihs/Public_data/genomes/Mitochondrial_DNA/rCRS-Del.fa"
+    "bwa":  "/software/Public_data/genomes/Mitochondrial_DNA/rCRS-Del.fa"
   }
 }
 ]

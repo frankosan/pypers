@@ -15,28 +15,22 @@
  along with Pypers.  If not, see <http://www.gnu.org/licenses/>.
  """
 
-import pymongo
-import json
-import os
-from pypers.db.models.mongo import PipelineDbConnector
-from pypers import config
+import getpass
+import nespipe.utils.utils as ut
 
-cfg_file = config.get_file_path('ref_genomes.json')
+from nespipe.utils import security
 
-post = ''
-with open(cfg_file) as fh:
-    post = json.load(fh)
+if __name__ == '__main__':
 
-db = PipelineDbConnector()
-try:
-    result = db.refgenomes.delete_many({})
-    print 'Deleted:',result.deleted_count
-    #result = db.refgenomes.insert_many(post)
-    result = db.refgenomes.insert_many(post)
-    print 'Inserted:',result.inserted_ids
-except pymongo.errors.BulkWriteError as bwe:
-    print '*** Bulk insert returned an error:\n'
-    print json.dumps(bwe.details, indent=4)
-    raise bwe
+    doc="""
+    Create a new  authentication tokem
+    """
 
+    user = getpass.getuser()
+    token = security.read_token()
+    if not security.validate_token(token):
+        ut.pretty_print("get new toke....")
+        token = security.get_new_token(user)
+    else:
+        ut.pretty_print('%s already has a valid token' % user)
 

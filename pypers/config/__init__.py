@@ -9,6 +9,9 @@ ACME_CI   = bool(os.environ.get('ACME_CI'  , False))
 ACME_LCL  = bool(os.environ.get('ACME_LCL' , False))
 
 
+
+
+LDAPS_ADDRESS = "" # ldap address of your company e.g 'ldaps://ldap.company.com:port'"
 MONGODB_HOST        = socket.gethostname()
 MONGODB_NAME        = 'pypers_db'
 WORK_DIR            = ROOT_DIR + '/lcl'
