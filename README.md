@@ -1,8 +1,7 @@
 Pypers
 ======
 
-![submission page]
-(https://github.com/frankosan/pypers/tree/master/images/pypers_submission.png)
+![submission page](/images/pypers_submission.png)
 
 A lightweight, scalable python-based pipeline execution manager combined with a richly featured web front-end.
 
