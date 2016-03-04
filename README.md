@@ -1,21 +1,20 @@
 Pypers
 ======
 
-![submission page](/images/pypers_submission.png)
+![submission page](/docs/images/pypers_submission.png)
 
 A lightweight, scalable python-based pipeline execution manager combined with a richly featured web front-end.
 
 Some of the main featurs:
 
 * general purpose automated pipeline for computational workflows
-* robust and scalable capable of batching pipeline runs for multiple inputs 
-* command line and web interface  
+* massive parallel execution of pipelines 
+* command line and web interface
 * library of reusable configurable steps (parameter driven)
 * ability to run pipelines either on computing clusters or locally on user workstations
 * no programming required for pipeline DAG definition
-* easy output data provenance
+* plugin architecture to work with different job scheduler
 * configurable ldap authentication
-
 
 
 
@@ -26,46 +25,7 @@ The *Pypers* package consists of two main sub-systems located in the following d
 * `mithril-ui` - contains the ui front-end 
 
 
-## Local Installation
-
-The software installation for code development purposes involves 1) setting up a "virtual environment", allowing for the use of concurrent versions of the software and 2) creating a clone (local repository) of the Pypers software.
-
-### Prerequisites
-
-The procedure described below assumes an already fully setup workspace:
-* a machine with...
-   * `sudo` rights (*)
-      *  `requiretty` and `secure_path` should be commented out in the sudoers file (edit it with `sudo visudo`)
-   * `node and npm` installed
-   * `bower` installed
-   * mongodb 
-   
-(*) only needed for development and testing
-
-### Creating a new virtual environment
-
-* Create a new ''virtual environment'' based on the central install:
-  ```
-conda create -p <path to environment> --yes --clone <path to anaconda>
-  ```
-* Activate the environment as shown below
-
-### Activating an Existing Environment
-
-After a first installation, the installed environment can easily be setup by running: 
-```
-export PATH=<path to anaconda>/bin:${PATH}
-source activate <path to environment>
-export ACME_LCL=1
-```
-
-### Deploying the software
-
-After modifying the code, one has to deploy the new executables to the virtual environment. This can be done by running (from within the local git repository):
-```
-python ./setup.py develop
-```
-Note that this only applies to the `pypers` software package, not to the front-end.
+[How to install](docs/installation.md)
 
 
 
