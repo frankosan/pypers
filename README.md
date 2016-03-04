@@ -13,7 +13,7 @@ Some of the main featurs:
 * library of reusable configurable steps (parameter driven)
 * ability to run pipelines either on computing clusters or locally on user workstations
 * no programming required for pipeline DAG definition
-* plugin architecture to work with different job scheduler
+* plugin architecture to work with different job schedulers
 * configurable ldap authentication
 
 
@@ -25,7 +25,9 @@ The *Pypers* package consists of two main sub-systems located in the following d
 * `mithril-ui` - contains the ui front-end 
 
 
-[How to install](docs/installation.md)
+### Installation
+
+[How to install pypers](docs/installation.md)
 
 
 
@@ -130,4 +132,11 @@ This is an example of pipeline with 3 steps:
         }
     }
 }
+```
+
+
+Once the server is up and running, to submit a pipeline
+
+```{r, engine='bash', count_lines}
+np_submit.py pipeline_name.cfg
 ```
