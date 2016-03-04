@@ -71,59 +71,96 @@ Note that this only applies to the `pypers` software package, not to the front-e
 
 ### Examples
 
+This is an example of a simple step which split and input file in chunck
+
+```python
+from nespipe.core.step import CmdLineStep
+
+class Split(CmdLineStep):
+    spec = {
+        "version": "1.0",
+        "local" : True,
+        "descr": [
+            "Splits an input file in several chuncks"
+        ],
+        "args":
+        {
+            "inputs": [
+                {
+                    "name"      : "input_file",
+                    "type"      : "file",
+                    "descr"     : "input file name"
+                },
+                {
+                    "name"      : "nchunks",
+                    "type"      : "int",
+                    "value"     : 100,
+                    "descr"     : "number of chunks in which the input file get splitted"
+                },
+            ],
+            "outputs": [
+                {
+                    "name"      : "output_files",
+                    "type"      : "file",
+                    "value"     : "*.fa",
+                    "descr"     : "output file names"
+                }
+            ],
+            "params" : [
+                {
+                    "name"      : "prefix",
+                    "type"      : "str",
+                    "value"     : "chunk_",
+                    "descr"     : "string prefix on the output files",
+                    "readonly"  : True
+                },
+                {
+                    "name"      : "suffix",
+                    "type"      : "str",
+                    "value"     : ".fa",
+                    "descr"     : "suffix added to the splitted files",
+                    "readonly"  : True
+                }
+            ]
+        },
+        "cmd": [
+            "split -n {{nchunks}} --suffix-length=4 -d --additional-suffix {{suffix}} {{input_file}} {{output_dir}}/{{prefix}}"
+        ]
+    }
+```
+
+
+
 ```json
 {
-    "name": "faire_seq", 
-    "label": "FAIRE-Seq",
+    "name" : "distributed_count",
+    "label": "Distributed count of string in file",
     "dag": {
         "nodes": {
-            "tagdust"       : "assembly.TagDust",
-            "bowtie2"       : "mapping.bowtie2" ,
-            "bamcheck"      : "samtools.BamCheck",
-            "plotbamcheck"  : "samtools.PlotBamCheck",
-            "bam2bed"       : "bedtools.Bam2Bed",
-            "fseq"          : "peak_calling.Fseq",
-            "genomecov"     : "bedtools.GenomeCov",
-            "bgtobw"        : "utils.BedgraphToBigwig"
-        }, 
+            "split":   "steps.split.Split",
+            "count":   "steps.count.Count",
+            "collect": "steps.collect.Collect"
+        },
         "edges": [
-          {
-            "from"      : "tagdust",
-            "to"        : "bowtie2",
-            "bindings"  : { "bowtie2.input_fq1" : "tagdust.output_fq1", 
-                           "bowtie2.input_fq2" : "tagdust.output_fq2" }
-          },
-          {
-            "from"      : "bowtie2",
-            "to"        : "bamcheck",
-            "bindings"  : { "bamcheck.input_files" : "bowtie2.output_bam" }
-          },
-          {
-            "from"      : "bamcheck",
-            "to"        : "plotbamcheck",
-            "bindings"  : { "plotbamcheck.input_files"  : "bamcheck.output_files" }
-          },
-          {
-            "from"      : "bowtie2",
-            "to"        : "bam2bed",
-            "bindings"  : { "bam2bed.input_bam" : "bowtie2.output_bam" }
-          },
-          {
-            "from"      : "bam2bed",
-            "to"        : "fseq",
-            "bindings"  : { "fseq.input_bed" : "bam2bed.output_bed" }
-          },
-          {
-            "from"      : "bowtie2",
-            "to"        : "genomecov",
-            "bindings"  : { "genomecov.input_bam" : "bowtie2.output_bam" }
-          },
-          {
-            "from"      : "genomecov",
-            "to"        : "bgtobw",
-            "bindings"  : { "bgtobw.input_bg" : "genomecov.output_bg" }
-          }
+            {
+                "from"     : "split",
+                "to"       : "count",
+                "bindings" : { "count.input_files" : "split.output_files" }
+            },
+            {
+                "from"     : "count",
+                "to"       : "collect",
+                "bindings" : { "collect.input_files" : "count.output_files" }
+            }
         ]
-    } 
+    },
+    "config" : {
+        "steps": {
+                "split": {
+                    "nchunks": 100,
+                    "suffix": ".txt"
+                }
+        }
+    }
 }
 ```
