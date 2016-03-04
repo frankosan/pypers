@@ -4,6 +4,18 @@ Pypers
 ![submission page](/images/pypers_submission.png)
 
 A lightweight, scalable python-based pipeline execution manager combined with a richly featured web front-end.
+Featurs:
+
+* general purpose automated pipeline for computational workflows
+* robust and scalable capable of batching pipeline runs for multiple inputs 
+* command line and web interface  
+* library of reusable configurable steps (parameter driven)
+* ability to run pipelines either on computing clusters or locally on user workstations
+* no programming required for pipeline DAG definition
+
+
+
+
 
 ### Code structure
 
