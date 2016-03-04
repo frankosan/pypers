@@ -71,7 +71,7 @@ Note that this only applies to the `pypers` software package, not to the front-e
 
 ### Examples
 
-This is an example of a simple step which split and input file in chunck
+This is an example of a simple command line step which split and input file in several chuncks
 
 ```python
 from nespipe.core.step import CmdLineStep
@@ -129,7 +129,14 @@ class Split(CmdLineStep):
     }
 ```
 
+A command line step does not need any programming.
+When the step get executed, the string in the "cmd" section get rendered with the "input" and "param" keys. The outputs keys are automatically populated at the end of the step execution using unix or regex pattern file matching
 
+
+This is an example of pipeline with 3 steps:
+* split : split an input file in 100 chunks
+* count : count the occurrency of a string in parallel in each chunk
+* collect : collect the result from count and sum them all 
 
 ```json
 {
