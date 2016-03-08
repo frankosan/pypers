@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License
  along with Pypers.  If not, see <http://www.gnu.org/licenses/>.
  """
- 
+
 import json
 import re
 import os
@@ -23,28 +23,36 @@ import cPickle
 import subprocess
 import socket
 import copy
-from pypers.utils import utils as ut
-from pypers.utils.utils import import_class
-from pypers.core.logger import logger
-from pypers.core.constants import *
+import glob
+import time
+from datetime import datetime
+from collections import OrderedDict, defaultdict
+from nespipe.utils import utils as ut
+from nespipe.utils.utils import import_class
+from nespipe.core.logger import logger
+from nespipe.core.constants import *
+from nespipe.core.schedulers import get_scheduler
+from nespipe.core.constants import *
 
-#from pypers.utils.utils import list2cmdline
+
+
+NOT_DB_ATTR = ['cfg', 'reqs', 'jvm_memory', 'memory', 'cpus', 
+               'jobs', 'sys_path', 'step_class', 'cmd_count'
+               'name', 'local_step', '__version__', 'scheduler', 'log']
 
 
 STEP_PICKLE = '.status.pickle'
 ITERABLE_TYPE = 'input_key_iterable'
 
-class JOB_STATUS(object):
-    """
-    List of possible job statuses
-    """
-#    NEW         = 'New'   # Not used!!!
-    QUEUED      = 'queued'
-    RUNNING     = 'running'
-    SUCCEEDED   = 'succeeded'
-    FAILED      = 'failed'
-    INTERRUPTED = 'interrupted'
-    SKIPPED     = 'skipped'
+STARTUP_CYCLE = 50
+
+
+scheduler = get_scheduler()
+
+def set_scheduler(schedname):
+    global scheduler
+    scheduler = get_scheduler(schedname)
+
 
 class Step(object):
     """
@@ -69,7 +77,7 @@ class Step(object):
             "params": [{}]
         },
         "requirements" : {
-            "memory" : '1', 
+            "memory" : '1',
             "cpus" : '1'
         }
     }
@@ -77,7 +85,7 @@ class Step(object):
     req_spec = {
         'memory' : {
             'name'      : 'memory',
-            'descr'     : 'the amount of memory allocated to the step in GB', 
+            'descr'     : 'the amount of memory allocated to the step in GB',
             'type'      : 'int',
             "value"     : 1
         },
@@ -86,43 +94,51 @@ class Step(object):
             'descr'     : 'the amount of CPUs allocated to the step',
             'type'      : 'enum',
             "options"   : range(1,17,1),
-            "value"     : 1 
+            "value"     : 1
         }
     }
-
 
     tpl_reg = re.compile('{{\s*([^\s\}]+)\s*}}')
 
     def __init__(self):
+        self.bootstrap = STARTUP_CYCLE
         self.status = JOB_STATUS.QUEUED
         self.meta = { 'pipeline':{}, 'step':{}, 'job':{}}
-        self.reqs = {'memory' : '1', 'cpus' : '1'}
+        self.requirements = {'memory' : '1', 'cpus' : '1'}
         self.output_dir = '.'
+        self.jobs = OrderedDict()
         self.cmd_count = 0
 
+        logger.set_stdout_level(logger.DEBUG)
+        self.log = logger.get_log()
+
         # parse specs and create keys
-        self.spec["name"] = self.__module__.replace('pypers.steps.','').split('.')[-1]
+        self.spec["name"] = self.__module__.replace('nespipe.steps.','').split('.')[-1]
         self.name = self.spec["name"]
         self.__version__ = self.spec['version']
 
         self.local_step = self.spec.get('local', False)
+        global scheduler
+        if self.local_step:
+            self.scheduler = get_scheduler("SCHED_LOCAL")
+        else:
+            self.scheduler = scheduler
 
-        for input in self.spec["args"]["inputs"]:
-            setattr(self, input["name"], input.get('value', None))
-        for output in self.spec["args"]["outputs"]:
-            setattr(self, output["name"], output.get('value', []))
-        for param in self.spec["args"].get("params",[]):
-            setattr(self, param["name"], param.get('value', None))
-        
-        ut.dict_update(self.reqs, self.spec.get('requirements', {'memory' : '1', 'cpus' : '1'}))
-        for key in self.reqs:
-            setattr(self, key, int(self.reqs[key]))
+        for k, v in self.spec["args"].iteritems():
+            for param in v:
+                if param.get('name', None):
+                    setattr(self, param['name'], param.get('value', []))
+
+        ut.dict_update(self.requirements, self.spec.get('requirements', {'memory' : '1', 'cpus' : '1'}))
+        for k, v in self.requirements.iteritems():
+            setattr(self, k, int(v))
 
         #set the jvm memory
-        if 'memory' in self.reqs:
-            self.jvm_memory = int(int(self.reqs['memory']) * 0.9)
+        if 'memory' in self.requirements:
+            self.jvm_memory = int(int(self.requirements['memory']) * 0.9)
             if not self.jvm_memory:
                 self.jvm_memory = 1
+
 
     def get_refgenome_tools(self):
         """
@@ -134,61 +150,6 @@ class Step(object):
             if param_type == TYPE_REFGENOME:
                 reftools.append({"name": p["name"], "tool": p["tool"]})
         return reftools
-
-    def get_output_keys(self):
-        """
-        Return list of output key strings
-        """
-        return [k["name"] for k in self.spec["args"]["outputs"]]
-
-    def get_outputs(self):
-        """
-        Return dictionary: { output key: output file name[s] }
-        """
-        outputs = {}
-        for okey in self.get_output_keys():
-            outputs[okey] = getattr(self,okey)
-        return outputs
-
-    def get_input_keys(self, required_only=False):
-        """
-        Return list of input key strings.
-        If all is true return only the required parameters without a default
-        """
-        input_keys = []
-        for input_key in self.spec["args"]["inputs"]:
-            if (required_only and not 'value' in input_key) or (not required_only):
-                input_keys.append(input_key["name"])
-        return input_keys
-
-    def get_param_values(self, get_req=True):
-        """
-        Return dictionary of parameter definitions including memory and cpus requirements
-        If 'get_req' is set to false then memory and cpus requirements are not returned
-        """
-        ret_dict = {}
-        for param in self.spec["args"].get("params", []):
-            ret_dict[param["name"]] = getattr(self, param["name"])
-
-        if get_req:
-            for key in self.reqs:
-                if self.reqs.get(key) != 1:
-                    ret_dict[key] = self.reqs.get(key) 
-
-        return ret_dict
-
-
-    def get_param_keys(self, required_only=False):
-        """
-        Return a list of keys parameters.
-        If required is True return only a list of the required parameters
-        """
-        params = []
-        for param in self.get_params():
-            if (required_only and not 'value' in param) or (not required_only):
-                params.append(param["name"])
-        return params
-
 
     def get_reqs(self, no_default=True):
         """
@@ -205,14 +166,94 @@ class Step(object):
         return reqs
 
 
-    def get_params(self):
+    def __validate_key_groups(self, key_groups):
         """
-        Return definition of the parameters
-        """
-        return self.spec["args"].get("params", [])
+        Check if the key_groups are valid
+        key_groups mut be in [inputs, outputs, params, requirements]
+        """        
+        spec_groups = set(['inputs', 'outputs', 'params', 'requirements'])
+        if isinstance(key_groups, basestring):
+            if not key_groups in spec_groups:
+                raise Exception("Invalid key_groups %s" %key_groups)
+            else:
+                return set([key_groups])
+        elif type(key_groups) == list or type(key_groups) == set:
+            key_groups = set(key_groups)
+            if not key_groups.issubset(spec_groups):
+                raise Exception ("%s: Invalid key_groups %s" %(self.name, key_groups))
+            else:
+                return key_groups
+        else:
+            raise Exception ("Invalid key_groups type %s" %type(key_groups))
 
 
-    def find_param(self, name):
+    def keys_values(self, key_groups=None, key_filter={}, req_only=False):
+        """
+        Return dictionary of parameter definitions
+        
+        """
+        if not key_groups:
+            key_groups=set(['inputs', 'outputs', 'params', 'requirements'])
+        else:
+            key_groups = self.__validate_key_groups(key_groups)
+
+        key_vals = {}
+        if 'requirements' in key_groups:
+            key_groups.remove('requirements')
+            key_vals = getattr(self, 'requirements')
+
+        for key_group in key_groups:
+            for key_spec in self.keys_specs(key_group):
+                if (req_only and not 'value' in key_spec) or (not req_only):
+                    if key_filter:
+                        for k, v in key_filter.iteritems():
+                            if key_spec.get(k, []) == v:
+                                key_vals[key_spec["name"]] = getattr(self, key_spec["name"])
+                    else:
+                        key_vals[key_spec["name"]] = getattr(self, key_spec["name"])
+
+        return key_vals
+
+
+    def keys(self, key_groups=None, key_filter={}, req_only=False):
+        """
+        Return a list of keys defined in the spec
+        If req_only is True, then default values are not returned
+        """
+        if not key_groups:
+            key_groups=set(['inputs', 'outputs', 'params', 'requirements'])
+        else:
+            key_groups = self.__validate_key_groups(key_groups)
+
+        keys = []
+        for key_group in key_groups:
+            for key_spec in self.keys_specs(key_group):
+                if (req_only and not 'value' in key_spec) or (not req_only):
+                    if key_filter:
+                        for k, v in key_filter.iteritems():
+                            if key_spec.get(k, []) == v:
+                                keys.append(key_spec['name'])
+                    else:
+                        keys.append(key_spec['name'])
+        return keys
+
+    def keys_specs(self, key_groups):
+        """
+        Returna list with the specification of the keys 
+        """
+
+        key_groups = self.__validate_key_groups(key_groups)
+        keys_specs = []
+        if 'requirements' in key_groups:
+            key_groups.remove('requirements')
+            keys_specs.extend(self.get_reqs())
+
+        for key_group in key_groups:
+            keys_specs.extend(self.spec["args"].get(key_group, []))
+        return keys_specs
+
+
+    def key_spec(self, name):
         """
         Return specification of param, input, or output with given name
         """
@@ -224,16 +265,16 @@ class Step(object):
                     break
         return ret_val
 
+
     def validate_config(self, cfg):
         """
         validate a config file
         """
         errors = {}
-        required_key = self.get_input_keys(required_only=True)
-        required_key.extend(self.get_param_keys(required_only=True))
+        required_key = self.keys(['inputs', 'params'], req_only=True)
         for key in required_key:
             if key in cfg:
-                key_spec = self.find_param(key)
+                key_spec = self.key_spec(key)
                 error_msg = Step.validate_value(
                     cfg[key],
                     key_spec.get('type', ''),
@@ -296,6 +337,315 @@ class Step(object):
         return ret_val
 
 
+    def store_outputs(self):
+        """
+        Stores the outputs in json format
+        """
+        #for debug store also the output keys in a output file
+        output_file = os.path.join(self.output_dir, "outputs.log")
+        with open(output_file, 'w') as fh:
+            logdata = {'outputs' : {}, 'meta': {}}
+            logdata['meta'] = self.meta
+            for key in self.keys('outputs'):
+                logdata['outputs'][key] = getattr(self, key)
+            fh.write(json.dumps(logdata) + '\n')
+
+    def store_pickle(self):
+        """
+        Store myself in a pickle file
+        """
+        #remvoe all the elements which can not be pickled
+        not_ser = {'log': '', 'scheduler': ''}
+        for attr in not_ser:
+            if self.__dict__.get(attr):
+                not_ser[attr] = self.__dict__.pop(attr)
+        pickle_file = os.path.join(self.output_dir, STEP_PICKLE)
+        with open(pickle_file, 'wb') as fh:
+            cPickle.dump(self, fh)
+        os.chmod(pickle_file, 0644)
+        for attr in not_ser:
+            setattr(self, attr, not_ser[attr])
+
+    def load_pickle(self):
+        """
+        Load the pickle file
+        """
+        #pickle_file = os.path.join(self.output_dir, STEP_PICKLE)
+        with open(os.path.join(self.output_dir, STEP_PICKLE), 'r') as fh:
+            obj = cPickle.load(fh)
+            for key in obj.__dict__:
+                setattr(self, key, getattr(obj, key))
+
+
+    def is_pickled(self):
+        """
+        Check if the picke file exists (it also to prevent nfs glitches)
+        """
+        return  True if os.path.exists(os.path.join(self.output_dir, STEP_PICKLE)) else False
+
+
+    def distribute(self):
+        """
+        Submit the step to the scheduler parallelizing the iterable inputs
+        """
+
+        self.status = JOB_STATUS.QUEUED
+        #initialize the scheduler
+        if self.local_step:
+            self.scheduler = get_scheduler("SCHED_LOCAL")
+        else:
+            self.scheduler = scheduler
+
+        if Step.__cfg_is_changed(self.cfg):
+            Step.__write_cfg_file(self.cfg)
+            Step.__remove_pickle(self.cfg)
+        elif self.is_pickled():
+            self.load_pickle()
+            if self.status == JOB_STATUS.SUCCEEDED:
+                self.log.info('Skipping step %s: configuration has not been changed' % self.name)
+                return len(self.jobs)
+
+        iterables = self.get_iterables()
+        if iterables:
+            # Step needs to be distributed
+            for iterable in iterables:
+                # If this is a file, convert it to list from file contents
+                iterable_input = self.cfg.get(iterable,[])
+                if not hasattr(iterable_input, '__iter__') \
+                   and os.path.exists(iterable_input):
+                    with open(iterable_input) as f:
+                        self.cfg[iterable] = f.read().splitlines()
+            for index in range(0, len(self.cfg[iterables[0]])):
+                #copy the config file
+                job_cfg = copy.deepcopy(self.cfg)
+                #copy the iterable specific to the job
+                for iterable in iterables:
+                    if iterable in self.cfg and self.cfg[iterable]: # permit a null file
+                        job_cfg[iterable] = self.cfg[iterable][index]
+                job_cfg['meta']['pipeline'] = self.cfg['meta']['pipeline']
+                job_cfg['meta']['step'] = self.cfg['meta']['step']
+                for key, value in self.cfg['meta']['job'].iteritems():
+                    job_cfg['meta']['job'][key] = value[index]
+                self.submit_job(job_cfg)
+        else:
+            job_cfg = copy.deepcopy(self.cfg)
+            self.submit_job(job_cfg)
+        return len(self.jobs)
+
+
+    def submit_job(self, cfg):
+        """
+        Submit a job step
+        """
+        job_cnt = str(len(self.jobs))
+        status = JOB_STATUS.QUEUED
+        self.log.debug('Configuring step %s %s' % (cfg['name'], job_cnt))
+
+        cfg['output_dir'] = os.path.join(cfg["output_dir"], job_cnt)
+        job = Step.load_step(cfg)
+        job.status = JOB_STATUS.QUEUED
+
+        if Step.__cfg_is_changed(cfg):
+            Step.__write_cfg_file(cfg)
+            Step.__remove_pickle(cfg)
+        elif job.is_pickled():
+            job.load_pickle()
+
+        job.__to_db_format()
+
+        if job.status == JOB_STATUS.SUCCEEDED:
+            self.log.info('Job %s in %s already completed: skipping' % (cfg['name'], cfg['output_dir']))
+            job_id = job_cnt
+        else:
+            cfg_file = os.path.join(cfg['output_dir'], cfg['name'] + ".cfg")
+            self.log.info('Submitting config file %s'% cfg_file)
+            job_id = self.scheduler.submit(ut.which('np_runstep.py'), [cfg_file], cfg['output_dir'], self.requirements)
+
+        job.job_id = job_id
+        self.jobs[job_id] = job
+
+
+    @staticmethod
+    def __cfg_is_changed(cfg):
+        """
+        Check if the config of the step is different from the one stored 
+        on the file system
+        For step disable the diff config since does not wor
+        """
+        retval = True
+        cfg_file = os.path.join(cfg['output_dir'], cfg['name'] + ".cfg")
+        if os.path.exists(cfg_file):
+            with open(cfg_file, "r") as fh:
+                stored_cfg = json.load(fh)
+            if not ut.DictDiffer(OrderedDict(stored_cfg), OrderedDict(cfg)).changed():
+                retval = False
+        return retval
+
+
+    @staticmethod
+    def __write_cfg_file(cfg):
+        """
+        Write a new config file in the output directory and remove the pickle file
+        """
+        if not os.path.exists(cfg['output_dir']):
+            os.makedirs(cfg['output_dir'], 0775)
+
+        cfg_file = os.path.join(cfg['output_dir'], cfg['name'] + ".cfg")
+        with open(cfg_file, "w") as fh:
+            fh.write(json.dumps(OrderedDict(cfg)))
+                
+
+    @staticmethod
+    def __remove_pickle(cfg):
+        """
+        Remove the pickle file
+        """
+        pickle_file = os.path.join(cfg['output_dir'], STEP_PICKLE)
+        if os.path.exists(pickle_file):
+            os.remove(pickle_file)
+
+
+
+    def get_status(self):
+        """
+        Return step and jobs status
+        """
+        running     = False
+        failed      = False
+        interrupted = False
+        succeeded   = True
+
+        if self.bootstrap:
+            self.bootstrap -= 1
+
+        if not self.bootstrap:
+            if self.status != JOB_STATUS.SUCCEEDED:
+                if self.local_step:
+                    time.sleep(1)
+                else:
+                    time.sleep(5)
+
+        incomplete_jobs = [job_id for job_id in self.jobs if self.jobs[job_id].status != JOB_STATUS.SUCCEEDED]
+        if incomplete_jobs:
+            for job_id, job_status in self.scheduler.status(incomplete_jobs).iteritems():
+                if (job_status == JOB_STATUS.SUCCEEDED
+                and not self.jobs[job_id].is_pickled()):
+                    job_status = JOB_STATUS.RUNNING
+
+                self.jobs[job_id].set_status(job_status)
+
+                running         |= (job_status == JOB_STATUS.RUNNING)
+                failed          |= (job_status == JOB_STATUS.FAILED)
+                interrupted     |= (job_status == JOB_STATUS.INTERRUPTED)
+                succeeded       &= (job_status == JOB_STATUS.SUCCEEDED)
+
+                if job_status != JOB_STATUS.RUNNING:
+                    running |= not self.jobs[job_id].is_pickled()
+
+        if failed:
+            self.status = JOB_STATUS.FAILED
+        elif interrupted:
+            self.status = JOB_STATUS.INTERRUPTED
+        elif running:
+            self.status = JOB_STATUS.RUNNING
+        elif succeeded:
+            self.status = JOB_STATUS.SUCCEEDED
+
+        if self.status == JOB_STATUS.SUCCEEDED:
+            #if self.stepobj.status != JOB_STATUS.SUCCEEDED:
+            self.fetch_results()
+            self.store_pickle()
+            self.store_outputs()
+
+        return self.status, [self.jobs[idx].__dict__.copy() for idx in self.jobs]
+
+
+    def fetch_results(self):
+        """
+        Load the output of each job and merge them
+        """
+
+        #check if stepobj has been already loaded
+        outputs_val = defaultdict(list)
+        outputs_meta = { 'pipeline':{}, 'step':{}, 'job':{} }
+        self.log.debug('Loading jobs outputs for step %s...' % self.name)
+
+        for job_id in self.jobs:
+            self.jobs[job_id].load_pickle()
+            job = self.jobs[job_id]
+            outputs_meta['pipeline'] = job.meta['pipeline']
+            outputs_meta['step'] = job.meta['step']
+            for param in self.keys('outputs'):
+                outputs_val[param].extend(getattr(job, param))
+            for key, value in job.meta['job'].iteritems():
+                if key in outputs_meta['job']:
+                    if not hasattr(outputs_meta['job'][key], '__iter__'):
+                        outputs_meta['job'][key] = [outputs_meta['job'][key]]
+                    outputs_meta['job'][key].append(value)
+                else:
+                    if self.get_iterables():
+                        outputs_meta['job'][key] = [value]
+                    else:
+                        outputs_meta['job'][key] = value
+
+        for key in self.keys('outputs'):
+            setattr(self, key, outputs_val[key])
+        self.meta = outputs_meta
+
+        #format the data for the database
+        for job_id, job in self.jobs.iteritems():
+            job.__to_db_format()
+
+
+    def __to_db_format(self):
+        """
+        Convert the Step data to a format specific for a Job
+        All the unserializable data needs to be removed
+        """
+        
+        self.meta = self.meta['job']
+
+        #remove all the attributes not needed before store 
+        #the jobs object in the db 
+        for attr in NOT_DB_ATTR:
+            if hasattr(self, attr):
+                delattr(self, attr)
+
+        self.inputs = {}
+        for key in self.keys('inputs'):
+            if hasattr(self, key):
+                self.inputs[key] = getattr(self, key)
+                delattr(self, key)
+
+        self.outputs = {}
+        for key in self.keys('outputs'):
+            if hasattr(self, key):
+                self.outputs[key] = getattr(self, key)
+                delattr(self, key)
+
+        #job.params = {}
+        for key in self.keys('params'):
+            if hasattr(self, key):
+                #job.params[key] = getattr(job, key)
+                delattr(self, key)
+
+
+    def stop(self):
+        """
+        Interrupt all running jobs
+        """
+        self.log.info('Stopping incomplete jobs')
+        running_jobs = [job_id for job_id in self.jobs if self.jobs[job_id].status == JOB_STATUS.RUNNING]
+        if running_jobs:
+            self.scheduler.stop(running_jobs)
+
+        for job_id in running_jobs:
+            self.jobs[job_id].set_status(JOB_STATUS.INTERRUPTED)
+
+        if self.status != JOB_STATUS.FAILED:
+            self.status = JOB_STATUS.INTERRUPTED
+
+
     def get_url(self):
         """
         Return the spec url
@@ -306,7 +656,7 @@ class Step(object):
         return url
 
 
-    def get_iterable(self):
+    def get_iterables(self):
         """
         Return the names of the iterable inputs, if any, or an empty list.
         """
@@ -314,6 +664,11 @@ class Step(object):
         for input in self.spec["args"]["inputs"]:
             if input.get('iterable', False):
                 iterables.append(input["name"])
+                #if not input.get('required',True):
+                #    if input.get('value'): 
+                #        iterables.append(input["name"])
+                #else:
+                #    iterables.append(input["name"])
         return iterables
 
     def print_params(self):
@@ -322,37 +677,22 @@ class Step(object):
         """
         self.log.info(json.dumps(self.spec, sort_keys=True, indent=4))
 
-    def set_param(self, name, value):
-        # Values are only stored in the step itself
-        setattr(self,name,value)
-
-    def store_pickle(self):
+    def set_status(self, status):
         """
-        Store myself in a pickle file
+        Update the status and time data
         """
-        self.log = '' # Cannot be pickled...
-        pickle_file = os.path.join(self.output_dir, STEP_PICKLE)
-        with open(pickle_file, 'wb') as fh:
-            cPickle.dump(self, fh)
-        os.chmod(pickle_file, 0644)
-
-        #for debug store also the output keys in a output file
-        output_file = os.path.join(self.output_dir, "outputs.log")
-        with open(output_file, 'w') as fh:
-            logdata = {'outputs' : {}, 'meta': {}}
-            logdata['meta'] = self.meta
-            for key in self.get_output_keys():
-                logdata['outputs'][key] = getattr(self, key)
-            fh.write(json.dumps(logdata) + '\n')
-
+        if self.status != status:
+            if status == JOB_STATUS.RUNNING:
+                self.running_at = datetime.utcnow()
+            elif status == JOB_STATUS.SUCCEEDED or status == JOB_STATUS.FAILED:
+                self.completed_at = datetime.utcnow()
+            self.status = status
 
     def run(self):
         """
         Pre-process, process and post-process.
         This is the routine called to actually run any step.
         """
-        logger.set_stdout_level(logger.DEBUG)
-        self.log = logger.get_log()
         self.status = JOB_STATUS.RUNNING
 
         this_dir = os.getcwd()
@@ -371,6 +711,7 @@ class Step(object):
 
         self.log.info(' step  %s successfully completed!' % self.name)
         self.store_pickle()
+        self.store_outputs()
         os.chdir(this_dir)
 
 
@@ -380,11 +721,14 @@ class Step(object):
         """
 
         # Outputs: convert relative to absolute paths and make sure it's a list
-        for key in self.get_output_keys():
+        for key in self.keys('outputs'):
             value = getattr(self, key)
-            if type(value) != list and isinstance(value, basestring):
-                if "*" in value:
-                    val = ut.find(self.output_dir, value)
+
+            #convert all the outputs to list objects
+            is_file_type = self.key_spec(key).get("type") == 'file'
+            if type(value) != list:
+                if "*" in value and isinstance(value, basestring) and is_file_type:
+                    val = [os.path.join(self.output_dir, f) for f in glob.glob(value)]
                     if not val:
                         raise Exception('%s error: reg ex %s does not match any file in the output directory' % (key, value))
                     else:
@@ -393,14 +737,14 @@ class Step(object):
                     setattr(self, key, [value])
 
             abs_outputs = []
-            if self.find_param(key).get("type") == 'file':
+            if is_file_type:
                 value = getattr(self, key)
                 if isinstance(value, basestring):
                     value = [value]
                 if isinstance(value, (list, tuple)):
                     for filename in value:
                         #chech the value exists
-                        if self.find_param(key).get("required", True):
+                        if self.key_spec(key).get("required", True):
                             if not os.path.exists(filename):
                                 raise Exception('File not found: %s' % filename)
 
@@ -565,8 +909,8 @@ class Step(object):
             class_name = import_class(step_name)
         except Exception:
             #try to load the step from step library
-            if not step_name.startswith('pypers.steps.'):
-                step_name = 'pypers.steps.' + step_name
+            if not step_name.startswith('nespipe.steps.'):
+                step_name = 'nespipe.steps.' + step_name
             class_name = import_class(step_name)
         return class_name
 
@@ -609,9 +953,8 @@ class Step(object):
         """
         Load a the step configuration and instanciate a step
         """
-       
-        cfg_data = cls.load_cfg(cfg)
 
+        cfg_data = cls.load_cfg(cfg)
         if 'sys_path' in cfg_data:
             sys.path.insert(0, cfg_data['sys_path'])
         else:
@@ -619,10 +962,10 @@ class Step(object):
         try:
             step = cls.create(cfg_data.get('step_class', ''))
             for key in cfg_data:
-                if key in step.reqs:
+                if key in step.requirements:
                     #cast memory and cpus to int since they are not validated
                     setattr(step, key, int(cfg_data[key]))
-                    step.reqs[key] = int(cfg_data[key])
+                    step.requirements[key] = int(cfg_data[key])
                 else:
                     setattr(step, key, cfg_data[key])
             if 'name' not in cfg_data:
@@ -631,6 +974,7 @@ class Step(object):
             raise Exception("Unable to load step class %s " % (cfg_data.get('step_class', '')))
         else:
             del sys.path[0]
+            step.cfg = cfg_data
             return step
 
     def configure_params(self):
@@ -647,7 +991,7 @@ class Step(object):
                 # Loop over all entries of all categories of parameters
                 name  = entry["name"]
                 value = getattr(self, name)
-                if value and type(value) is not list and not isinstance(value,(int, float)):
+                if value and isinstance(value, basestring):
                     matches = self.tpl_reg.findall(value)
                     for match in matches: # value is templated
                         subst_val = getattr(self, match)
@@ -657,7 +1001,7 @@ class Step(object):
                         else:
                             subst_val = str(subst_val)
                         # If this is a file, take the bare file name
-                        if self.find_param(match).get("type") in ['file', 'ref_genome']:
+                        if self.key_spec(match).get("type") in ['file', 'ref_genome']:
                             subst_val = os.path.basename(subst_val).split('.')[0]
                         if subst_val:
                             newval = re.sub('{{\s*' + match + '\s*}}', subst_val, value)
@@ -730,9 +1074,9 @@ class RStep(CmdLineStep):
 
         if not self.spec.get('extra_env', ''):
             self.spec["extra_env"] = {
-               'PATH' : '/software/pypers/R/R-3.0.0/bin/',
-               'LD_LIBRARY_PATH' : '/software/pypers/R/R-3.0.0/lib64/R/lib',
-               'R_HOME' : '/software/pypers/R/R-3.0.0/lib64/R'
+               'PATH' : '/sonas/Software/R/R-3.0.0/bin/',
+               'LD_LIBRARY_PATH' : '/sonas/Software/R/R-3.0.0/lib64/R/lib',
+               'R_HOME' : '/sonas/Software/R/R-3.0.0/lib64/R'
             }
 
 
@@ -759,7 +1103,7 @@ class RStep(CmdLineStep):
 class FunctionStep(Step):
     #flag to enable local step execution
     local_step = True
-    
+
     def __init__(self):
         # Call the base class' initialization
         super(FunctionStep, self).__init__()
@@ -779,6 +1123,7 @@ class FunctionStep(Step):
         #self.set_outputs()
         self.status = JOB_STATUS.SUCCEEDED
         self.store_pickle()
+        self.store_outputs()
         os.chdir(this_dir)
 
 

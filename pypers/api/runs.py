@@ -202,27 +202,9 @@ class RunsApi:
                     output_files = []
                     for job_id, job in enumerate(step['jobs']):
                         for key in job['outputs']:
-                            if key in s.get_output_keys(ktype='file'):
+                            if key in s.keys(key_groups='outputs', key_filter={'type':'file'}):
                                 for i, filename in enumerate(job['outputs'][key]):
                                     output = { 'path': filename }
-
-                                    # ext = os.path.splitext(filename)[1][1:].upper()
-                                    # for key in job.get('meta', {}):
-                                    #     meta = job['meta'][key]
-                                    #     output['meta']['job_id'] = job_id
-
-                                    #     if key == 'sample_id':
-                                    #         okey = 'Operational sample accession'
-                                    #     else:
-                                    #         okey = key
-
-                                    #     if isinstance(meta, list):
-                                    #         output['meta'][okey] = meta[i]
-                                    #     else:
-                                    #         output['meta'][okey] = meta
-
-                                    # output['meta']['File type'] = 'Processed data file'
-                                    # output['meta']['File format'] = ext
 
                                     if not isinstance(filename, list):
                                         output['archived'] = (filename in file_registry)
@@ -277,14 +259,12 @@ class RunsApi:
                     output_files = {}
                     for job_id, job in enumerate(step['jobs']):
                         for key in job['outputs']:
-                            if key in s.get_output_keys(ktype='file'):
+                            if key in s.keys(key_groups='outputs', key_filter={'type':'file'}):
                                 for i, filename in enumerate(job['outputs'][key]):
                                     filemeta = {'step': step['name'], 'job_id': job_id}
                                     ext = os.path.splitext(filename)[1][1:].upper()
                                     for key in job.get('meta', {}):
-                                        meta = job['meta'][key]
-                                        
-
+                                        meta = job['meta'][key]                                       
                                         if key == 'sample_id':
                                             okey = 'Operational sample accession'
                                         else:

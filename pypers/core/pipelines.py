@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License
  along with Pypers.  If not, see <http://www.gnu.org/licenses/>.
  """
-
+ 
 import json
 import os
 import pwd
@@ -26,16 +26,16 @@ import shutil
 
 from collections import defaultdict
 
-from pypers.core.jobscheduler import JobScheduler
-from pypers.core.logger import logger
-from pypers.core.step import Step, JOB_STATUS, STEP_PICKLE
-from pypers.core.constants import *
-from pypers.utils import utils as ut
-from pypers.pipelines import pipeline_names
-from pypers.db.models import db_models
-from pypers.db.models import mongo
-from pypers.config import WORK_DIR
-from pypers.pipelines import pipeline_specs
+#from nespipe.core.jobscheduler import JobScheduler
+from nespipe.core.logger import logger
+from nespipe.core.step import Step, set_scheduler
+from nespipe.core.constants import *
+from nespipe.utils import utils as ut
+from nespipe.pipelines import pipeline_names
+from nespipe.db.models import db_models
+from nespipe.db.models import mongo
+from nespipe.config import WORK_DIR
+from nespipe.pipelines import pipeline_specs
 
 LOCK_FILE = 'LOCK'
 FINAL_STEP = 'finalize'
@@ -129,9 +129,9 @@ class Pipeline(Step):
                 'descr': self.description,
                 'run_id': self.run_id
             },
-            'steps': {}
+            'steps': {},
+            'job' : {}
         }
-
 
         self.db = db_models[db_model_name](self.name, self.cfg, self.ordered, self.user, output_dir=self.output_dir)
         if hasattr(self.db, 'run_id'):
@@ -139,16 +139,17 @@ class Pipeline(Step):
             self.cfg['run_id'] = self.run_id
 
         # Define the output directories
-
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir, 0775)
 
-        if self.run_id:
+        # Use default output dir under /scratch/cgi/nespipe (linked to user-defined dir.)
+        # if: a) this run is using the db (so we have a run ID); b) it is not a demux. run;
+        # and c) the user-defined directory is not already under /scratch
+        if self.run_id and not (self.name == 'demultiplexing'):
             dirname = '%s_%d' % (self.name, self.db.run_id)
             self.output_dir = os.path.join(self.output_dir, dirname)
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir, 0775)
-                
             # In case of /scratch, do not create an additional sub-directory
             if self.output_dir.startswith('/scratch'):
                 self.work_dir = self.output_dir
@@ -208,18 +209,18 @@ class Pipeline(Step):
                 if stepname in cfg['config']['steps']:
                     required_keys = []
                     required_keys.extend(unb_inputs.get(stepname, []))
-                    required_keys.extend(stepobj.get_param_keys(required_only=True))
+                    required_keys.extend(stepobj.keys(['params'], req_only=True))
                     stepcfg = cfg['config']['steps'][stepname]
                     for key in required_keys:
                         if key in stepcfg:
-                            param_spec = stepobj.find_param(key)
+                            param_spec = stepobj.key_spec(key)
                             error_msg = stepobj.validate_value(stepcfg[key], param_spec['type'], param_spec['name'])
                             if error_msg:
                                 s_errors[stepname][key] = error_msg
                         else:
                             s_errors[stepname][key] = 'missing value'
                 else:
-                    for key in stepobj.get_param_keys(required_only=True):
+                    for key in stepobj.keys(['params'], req_only=True):
                         s_errors[stepname][key] = 'missing value'
                     if stepname in unb_inputs:
                         for key in unb_inputs[stepname]:
@@ -266,11 +267,11 @@ class Pipeline(Step):
         uinputs = defaultdict(dict)
         for stepname, classname in cfg['dag']['nodes'].iteritems():
             step = Step.create(classname)
-            input_keys = step.get_input_keys(required_only=True)
+            input_keys = step.keys('inputs', req_only=True)
             if input_keys:
                 for pred in dag.predecessors(stepname):
                     # Remove any key that is already bound
-                    for binding in dag[pred][stepname]['bindings']:
+                    for binding in dag[pred][stepname].get('bindings', []):
                         key = binding.split('.')[1]
                         #maybe it has been already removed
                         if key in input_keys:
@@ -314,13 +315,13 @@ class Pipeline(Step):
 
         if cfg.get('config', {}).get('steps', {}):
             steps_config = copy.deepcopy(cfg['config']['steps'])
-        
+
 
         #add the parameters and unbound inputs
         for stepname in stepobjs:
             params['steps'][stepname]['descr'] = stepobjs[stepname].spec.get('descr')
             params['steps'][stepname]['url'] = stepobjs[stepname].get_url()
-            step_params = stepobjs[stepname].get_params() + stepobjs[stepname].get_reqs()
+            step_params = stepobjs[stepname].keys_specs(['params', 'requirements'])
             if step_params:
                 params['steps'][stepname]["params"] = copy.deepcopy(step_params)
                 if stepname in steps_config:
@@ -341,10 +342,10 @@ class Pipeline(Step):
         for stepname in steps_inputs:
             params['steps'][stepname]['inputs'] = []
             for input_key in steps_inputs[stepname]:
-                inputspec = copy.deepcopy(stepobjs[stepname].find_param(input_key))
+                inputspec = copy.deepcopy(stepobjs[stepname].key_spec(input_key))
                 #overwrite the value with the value set in the config section
                 cfg_value = steps_config.get(stepname, {}).get(input_key, {})
-                if cfg_value: 
+                if cfg_value:
                     inputspec['value'] = cfg_value
                 params['steps'][stepname]['inputs'].append(inputspec)
 
@@ -406,6 +407,28 @@ class Pipeline(Step):
 
         return refs_by_label
 
+
+    @staticmethod
+    def extend_cfg(cfg1, cfg2):
+        """
+        Merge the 2 pipeline configuration
+        """
+        cfg2_nodes = cfg2.get('dag', {}).get('nodes', {})
+        cfg2_edges = cfg2.get('dag', {}).get('edges', {})
+        cfg2_config = cfg2.get('config', {}).get('steps', {})
+
+        if cfg2_nodes:
+            cfg1['dag']['nodes'].update(cfg2_nodes)
+
+        if cfg2_edges:
+            cfg1['dag']['edges'].extend(cfg2_edges)
+
+        if cfg2_config:
+            cfg1['config']['steps'].update(cfg2_config)
+
+        return cfg1
+
+
     @classmethod
     def ordered_steps(cls, cfg):
         """
@@ -420,23 +443,25 @@ class Pipeline(Step):
         Is expecting as input one between a file, a json text or a dictionary
         """
 
-        cfg_data = None
+        cfg_load = None
         try:
             if type(cfg) == dict:
-                cfg_data = copy.deepcopy(cfg)
-            elif type(cfg) == str:
+                cfg_load = copy.deepcopy(cfg)
+            elif isinstance(cfg, basestring):
                 if os.path.exists(cfg):
                     with open(cfg) as fh:
-                        cfg_data = json.load(fh)
-                        if 'sys_path' not in cfg_data:
-                            cfg_data['sys_path'] = os.path.dirname(os.path.realpath(cfg))
+                        cfg_load = json.load(fh)
+                        if 'sys_path' not in cfg_load:
+                            cfg_load['sys_path'] = os.path.dirname(os.path.realpath(cfg))
                 else:
-                    cfg_data = json.load(cfg)
+                    cfg_load = json.load(cfg)
         except Exception as e:
             raise Exception("Unable to load config file %s: %s" % (cfg, e))
         else:
             #load the spec_type or spec_file into the json_spec
             #if they exists
+            cfg_data = { 'config' : {'steps': {}, 'pipeline' : {'project_name' : '', 'description' : '', 'output_dir': ''}}}
+            ut.dict_update(cfg_data, cfg_load)
 
             if 'sys_path' in cfg_data:
                 sys.path.insert(0, cfg_data['sys_path'])
@@ -459,7 +484,7 @@ class Pipeline(Step):
                         stepobjs = Pipeline.create_steps(spec)
                         steps_defaults = {}
                         for step in stepobjs:
-                            step_default = stepobjs[step].get_param_values()
+                            step_default = stepobjs[step].keys_values(['params', 'requirements'])
                             if step_default:
                                 steps_defaults[step] = step_default
 
@@ -471,6 +496,7 @@ class Pipeline(Step):
                         cfg_data = spec
                 except:
                     raise
+
 
             if cfg_data.get('config', {}).get('pipeline', {}).get('refgenome',{}):
                 key_refgenome = cfg_data['config']['pipeline'].pop('refgenome')
@@ -518,9 +544,11 @@ class Pipeline(Step):
                 if ready:
                     next_steps.add(node)
 
+
         # delay final step till the end
         remaining = len(self.dag.nodes()) - len(self.completed)
-        if remaining>1 and (FINAL_STEP in next_steps):
+
+        if remaining > 1 and (FINAL_STEP in next_steps):
             next_steps.remove(FINAL_STEP)
 
         if len(next_steps) > 0:
@@ -532,7 +560,6 @@ class Pipeline(Step):
         """
         Configure and run a job for the given step
         """
-        self.log.debug("Submitting step %s" % step_name)
 
         #skip the input step
         if step_name == 'inputs':
@@ -547,9 +574,11 @@ class Pipeline(Step):
                 step_config = self.cfg
                 step_config['sys_path'] = self.sys_path
                 step_config['output_dir'] = self.output_dir
-                step_config['meta'] = { 'pipeline':{}, 'step':{}, 'job':{} }
+                step_config['meta'] = { 'meta' : { 'pipeline':{}, 'step':{}, 'job':{} }}
+                ut.dict_update(step_config['meta']['pipeline'], self.meta['pipeline'])
             elif step_name == FINAL_STEP:
                 step_config = { 'meta' : { 'pipeline':{}, 'step':{}, 'job':{} } }
+                ut.dict_update(step_config['meta']['pipeline'], self.meta['pipeline'])
                 step_config['name'] = FINAL_STEP
                 step_config['step_class'] = self.dag.node[step_name]['class_name']
                 step_config['target_dir'] = self.output_dir
@@ -558,6 +587,7 @@ class Pipeline(Step):
                 self.configure_finalstep(step_config)
             else:
                 step_config = { 'meta' : { 'pipeline':{}, 'step':{}, 'job':{} } }
+                ut.dict_update(step_config['meta']['pipeline'], self.meta['pipeline'])
                 step_class = self.dag.node[step_name]['class_name']
                 step_config['name'] = step_name
                 step_config['sys_path'] = self.sys_path
@@ -569,7 +599,7 @@ class Pipeline(Step):
                 for pred in self.dag.predecessors(step_name):
                     edge = self.dag[pred][step_name]
                     # Not an actual loop: just get key/value
-                    for bind_to, bind_from in edge['bindings'].iteritems():
+                    for bind_to, bind_from in edge.get('bindings', {}).iteritems():
                         to_key = bind_to.split('.')[1]
                         if hasattr(bind_from, '__iter__'):
                             for from_key in bind_from:
@@ -606,11 +636,11 @@ class Pipeline(Step):
 
             # 3. Submit step
             self.log.info('Executing step %s' % str(step_name))
-            self.log.debug('  step configuration: %s' % ut.format_dict(step_config))
+            self.log.debug('  step configuration:\n %s' % ut.format_dict(step_config, indent=4))
             self.log.info('  step %s queued ' % str(step_name))
 
-            self.running[step_name] = JobScheduler(step_config)
-            job_counter = self.running[step_name].start()
+            self.running[step_name] = Step.load_step(step_config)
+            job_counter = self.running[step_name].distribute()
             self.db.start_step(step_name, step_config, job_counter)
 
     def update_metadata(self, step_name, step_meta):
@@ -621,7 +651,7 @@ class Pipeline(Step):
         modified = False
         if 'pipeline' in step_meta:
             ut.dict_update(self.meta['pipeline'], step_meta['pipeline'])
-            self.log.debug('Pulled metadata from step: %s' % ut.format_dict(self.meta))
+            #self.log.debug('Pulled metadata from step: %s' % ut.format_dict(self.meta))
             self.db.update_pipeline_metadata(copy.deepcopy(self.meta['pipeline']))
         self.db.update_step_metadata(step_name, copy.deepcopy(self.meta['steps'][step_name]['step']))
 
@@ -639,9 +669,10 @@ class Pipeline(Step):
             if step_status == JOB_STATUS.SUCCEEDED:
                 self.completed.append(step_name)
                 self.log.info("Step %s completed" % step_name)
-                self.outputs[step_name] = self.running[step_name].get_outputs()
-                #self.outputs[step_name]['output_dir'] = os.path.join(self.work_dir, step_name)
-                self.update_metadata(step_name, self.running[step_name].stepobj.meta)
+                self.outputs[step_name] = self.running[step_name].keys_values('outputs')
+                self.outputs[step_name]['output_dir'] = self.running[step_name].output_dir
+                
+                self.update_metadata(step_name, self.running[step_name].meta)
                 self.db.set_step_outputs(step_name, self.outputs[step_name])
                 self.log.debug('Got outputs:\n%s' % ut.format_dict(self.outputs[step_name], indent=4))
                 self.running.pop(step_name)
@@ -682,7 +713,7 @@ class Pipeline(Step):
         """
 
         ### 1. Result files
-        results_keys = self.cfg[KEY_CONFIG][KEY_PIPELINE].get("results", [])
+        results_keys = self.cfg["config"].get("pipeline", {}).get("results", [])
         results_files = []
         for key in results_keys:
             # Allow for "step" or "step.output_key"
@@ -707,7 +738,7 @@ class Pipeline(Step):
                         results_files.append(files)
 
         ### 2. File deletion (also resets corresponding step)
-        del_keys  = self.cfg[KEY_CONFIG][KEY_PIPELINE].get("delete", [])
+        del_keys  = self.cfg["config"].get("pipeline", {}).get("delete", [])
         delete_files = []
         for key in del_keys:
             # Allow for "step" or "step.output_key"
@@ -767,7 +798,7 @@ class Pipeline(Step):
             logger.set_stdout_level(logger.DEBUG if verbose else logger.INFO)
         self.log = logger.get_log()
 
-        JobScheduler.set_scheduler(self.schedname)
+        set_scheduler(self.schedname)
 
         # Check and create lock file
         self.lock = os.path.join(self.work_dir, LOCK_FILE)
@@ -781,7 +812,8 @@ class Pipeline(Step):
         with open(os.path.join(self.work_dir, 'pipeline.cfg'), 'w') as fh:
             self.log.info('Saving configuration to file %s' % fh.name)
             json.dump(self.cfg, fh, indent=4, sort_keys=True)
-        self.log.info('Environment:\n %s' % os.environ)
+
+        #self.log.info('Environment:\n %s' % os.environ)
 
         self.all_ok = True
         while self.all_ok:

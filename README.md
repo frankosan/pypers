@@ -135,7 +135,7 @@ This is an example of pipeline with 3 steps:
 ```
 
 
-Once the server is up and running, to submit a pipeline
+Once the server is up and running, to submit a pipeline, type
 
 ```{r, engine='bash', count_lines}
 np_submit.py pipeline_name.cfg
