@@ -33,7 +33,7 @@ The *Pypers* package consists of two main sub-systems located in the following d
 
 ### Examples
 
-This is an example of a simple command line step which split and input file in several chuncks
+This is an example of a simple command line step
 
 ```python
 from nespipe.core.step import CmdLineStep
@@ -91,8 +91,7 @@ class Split(CmdLineStep):
     }
 ```
 
-A command line step does not need any programming.
-When the step get executed, the string in the "cmd" section get rendered with the "input" and "param" keys. The outputs keys are automatically populated at the end of the step execution using unix or regex pattern file matching
+A command line step execute the command in the "cmd" section rendering all the variables in {{}} with the corresponding value passed to the "input" and "params" keys
 
 
 This is an example of pipeline with 3 steps:
