@@ -33,6 +33,8 @@ The *Pypers* package consists of two main sub-systems located in the following d
 
 ### Examples
 
+#### Step definition
+
 This is an example of a simple command line step
 
 ```python
@@ -93,6 +95,8 @@ class Split(CmdLineStep):
 
 A command line step execute the command in the "cmd" section rendering all the variables in {{}} with the corresponding value passed to the "input" and "params" keys
 
+
+#### Pipeline definition
 
 This is an example of pipeline with 3 steps:
 * split : split an input file in 100 chunks
