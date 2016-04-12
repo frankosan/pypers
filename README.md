@@ -33,7 +33,7 @@ The *Pypers* package consists of two main sub-systems located in the following d
 
 ### Examples
 
-#### Step definition
+##### Step definition
 
 This is an example of a simple command line step
 
@@ -137,6 +137,7 @@ This is an example of pipeline with 3 steps:
 }
 ```
 
+##### Pipeline submission
 
 Once the server is up and running, to submit a pipeline, type
 
