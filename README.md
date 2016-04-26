@@ -1,7 +1,7 @@
 Pypers
 ======
 
-![submission page](/docs/images/pypers_submission.png)
+![submission page](/docs/images/rnaseq_submission.png)
 
 A lightweight, scalable python-based pipeline execution manager combined with a richly featured web front-end.
 
